@@ -55,7 +55,7 @@ class MapScreen:
     # Handle left clicks of territories
     def handle_click(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: # Left mouse button click
-            territory = self.get_territory_at(pygame.mouse.get_pos())
+            territory = self.get_territory_at(event.pos())
             if territory is not None:
                 self.selected_territory = territory
                 print(f"Selected territory: {territory.name}")

@@ -12,7 +12,7 @@ territories = {
             "Alberta", 
             "Kamchatka"
             ],
-        mask_color=(1, 0, 0),
+        mask_color=(255, 0, 0),
         label_position=(50, 70),
     ),
     "Northwest Territory": Territory(
@@ -24,7 +24,7 @@ territories = {
             "Ontario", 
             "Greenland"
         ],
-        mask_color=(2, 0, 0),
+        mask_color=(0, 255, 0),
         label_position=(125, 70),
     ),
     "Alberta": Territory(
@@ -36,7 +36,7 @@ territories = {
             "Ontario",
             "Western United States"
         ],
-        mask_color=(3, 0, 0),
+        mask_color=(0, 0, 255),
         label_position=(105, 105),
     ),
 }
