@@ -29,7 +29,8 @@ class MenuScreen:
     def draw(self, surface):
         for button in self.buttons:
             button.draw(surface)
-        text_surface = font.render
+        # Draw rest of menu here
+        # text_surface = font.render
 
     def update(self):
         pass

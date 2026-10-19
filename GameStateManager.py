@@ -1,7 +1,7 @@
 import constants
 import pygame
 import sys
-import menu
+import Screens.menu as menu
 from enum import Enum
 from elements import Button
 

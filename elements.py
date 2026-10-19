@@ -1,5 +1,6 @@
 import pygame
-
+# BASICALLY USELESS FILE BTW
+# WE SHOULD DECIDE AND PROBABLY JUST USE pygame-widgets
 # File will include a library of pre-built elements to incorporate in various menus and UI screens
 
 
