@@ -9,16 +9,12 @@ from GLOBALS import WINDOW_WIDTH, WINDOW_HEIGHT, INSTRUCTIONS, BACKGROUND_COLOR,
 class InstructionsMenu:
     def __init__(self, screen):
         self.screen = screen
-        self.screen.fill(BACKGROUND_COLOR)
-        self.buttons = self.create_buttons()
         self.current_instruction = "setup"
         self.message = INSTRUCTIONS[self.current_instruction]
-        self.running = True
+        self.running = False
+        self.visible = False
         self.font = self.create_font()
-        self.text = self.font.render(self.message, True, TEXT_COLOR)
-        self.screen.blit(self.text,
-                         (5, WINDOW_HEIGHT // 10 + 5)
-                         )
+        self.buttons = self.create_buttons()
 
     def create_buttons(self):
         buttons = ButtonArray(
@@ -62,26 +58,30 @@ class InstructionsMenu:
         )
 
     def close_instructions(self):
-        # Close the window (clear screen and redraw the Playing screen)
         self.running = False
-        # Switch game state back to "Playing"
-        pass
+        self.visible = False
 
     def change_tab(self, tab):
         self.current_instruction = tab
         self.message = INSTRUCTIONS[self.current_instruction]
 
     def run(self):
+        # Reset the menu each time it is opened.
+        self.running = True
+        self.visible = True
+
         while self.running:
             events = pygame.event.get()
 
             for event in events:
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                    raise SystemExit
+                    self.close_instructions()
+                    return "quit"
 
             self.screen.fill(BACKGROUND_COLOR)
             self.update_text(self.message)
 
             pygame_widgets.update(events)
-            pygame.display.update()
+            pygame.display.flip()
+
+        return "closed"
