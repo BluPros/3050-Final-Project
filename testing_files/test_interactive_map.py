@@ -6,8 +6,8 @@ from ui.map_screen import MapScreen
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 533
 
-VISIBLE_MAP = "assets/maps/risk_map_original.png"
-MASK_MAP = "assets/maps/risk_map_mask.png"
+VISIBLE_MAP = "../assets/maps/risk_map_original.png"
+MASK_MAP = "../assets/maps/risk_map_mask.png"
 
 
 def main():
