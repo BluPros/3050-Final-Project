@@ -2,6 +2,7 @@ import constants
 import pygame
 import sys
 import screens.menu as menu
+import screens.playing as playing
 from enum import Enum
 from elements import Button
 
@@ -17,7 +18,7 @@ class GameStateManager:
         # All available game states/screens
         self.screens = {
             "menu": menu.MenuScreen(self, constants.WINDOW_WIDTH),
-            # "playing": PlayingScreen(self),
+            "playing": playing.PlayingScreen(self, constants.WINDOW_WIDTH),
             # "help": HelpScreen(self)
         }
         # On Init Default Screen is "menu"
