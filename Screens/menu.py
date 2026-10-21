@@ -1,10 +1,10 @@
 import pygame
-import sys
 import constants
-import GameStateManager
 from elements import Button
 
-# Menu Class
+# Menu Screen
+# TODO: Discard elements usage, use pre-built buttons from:
+# from pygame_widgets.button import ButtonArray
 
 
 class MenuScreen:
@@ -22,7 +22,7 @@ class MenuScreen:
         ]
 
     def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button() == 1:
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             for button in self.buttons:
                 button.click(event.pos)
 
