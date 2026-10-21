@@ -1,8 +1,14 @@
+## IMPORT SYS PATH TO PARENT FOLDER ALLOWS RUN
+## MUST BE ABOVE import instructions_menu
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import instructions_menu
 import pygame
 import pygame_widgets
 from pygame_widgets.button import Button
-import instructions_menu
+
 
 pygame.init()
 
