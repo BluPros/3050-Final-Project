@@ -15,9 +15,9 @@ class MenuScreen:
         center_x = (window_width - button_width) // 2
         # Active screen buttons
         self.buttons = [
-            Button("Play", center_x, 220, button_width, 60,
+            Button("Play", center_x, 200, button_width, 60,
                    lambda: manager.change_screen("playing"), constants.LIGHT_BLUE, constants.WHITE),
-            Button("Quit", center_x, 320, button_width, 60,
+            Button("Quit", center_x, 300, button_width, 60,
                    manager.quit_game, constants.LIGHT_BLUE, constants.WHITE)
         ]
 
