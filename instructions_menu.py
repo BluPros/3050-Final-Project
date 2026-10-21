@@ -4,7 +4,8 @@ This class is intended to be...
 import pygame
 import pygame_widgets
 from pygame_widgets.button import ButtonArray
-from GLOBALS import WINDOW_WIDTH, WINDOW_HEIGHT, INSTRUCTIONS, BACKGROUND_COLOR, TEXT_COLOR
+from constants import WINDOW_WIDTH, WINDOW_HEIGHT, INSTRUCTIONS, BACKGROUND_COLOR, TEXT_COLOR
+
 
 class InstructionsMenu:
     def __init__(self, screen):
@@ -18,25 +19,26 @@ class InstructionsMenu:
 
     def create_buttons(self):
         buttons = ButtonArray(
-        win=self.screen,
-        x=0,
-        y=0,
-        width=WINDOW_WIDTH,
-        height = WINDOW_HEIGHT//10,
-        shape = (8,1),
-        border = 2,
-        texts = ('Setup','Turn Order','Deploy','Attack','Risk Cards','Fortify','Winning', 'Exit'),
-        colour=(0,0,0),
-        fontColour=(232, 211, 165),
-        onClicks = (lambda: self.change_tab("setup"),
-                    lambda: self.change_tab("turn_order"),
-                    lambda: self.change_tab("deploy"),
-                    lambda: self.change_tab("attack"),
-                    lambda: self.change_tab("risk_cards"),
-                    lambda: self.change_tab("fortify"),
-                    lambda: self.change_tab("winning"),
-                    lambda: self.close_instructions()
-                    )
+            win=self.screen,
+            x=0,
+            y=0,
+            width=WINDOW_WIDTH,
+            height=WINDOW_HEIGHT//10,
+            shape=(8, 1),
+            border=2,
+            texts=('Setup', 'Turn Order', 'Deploy', 'Attack',
+                   'Risk Cards', 'Fortify', 'Winning', 'Exit'),
+            colour=(0, 0, 0),
+            fontColour=(232, 211, 165),
+            onClicks=(lambda: self.change_tab("setup"),
+                      lambda: self.change_tab("turn_order"),
+                      lambda: self.change_tab("deploy"),
+                      lambda: self.change_tab("attack"),
+                      lambda: self.change_tab("risk_cards"),
+                      lambda: self.change_tab("fortify"),
+                      lambda: self.change_tab("winning"),
+                      lambda: self.close_instructions()
+                      )
         )
         for button in buttons.buttons:
             button.colour = (139, 99, 62)
