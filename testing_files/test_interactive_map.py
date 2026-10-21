@@ -1,3 +1,7 @@
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import pygame
 
 from ui.map_screen import MapScreen
@@ -6,8 +10,8 @@ from ui.map_screen import MapScreen
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 533
 
-VISIBLE_MAP = "../assets/maps/risk_map_original.png"
-MASK_MAP = "../assets/maps/risk_map_mask.png"
+VISIBLE_MAP = "./assets/maps/risk_map_original.png"
+MASK_MAP = "./assets/maps/risk_map_mask.png"
 
 
 def main():
