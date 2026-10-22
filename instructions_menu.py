@@ -4,8 +4,15 @@ This class is intended to be...
 import pygame
 import pygame_widgets
 from pygame_widgets.button import ButtonArray
-from constants import WINDOW_WIDTH, WINDOW_HEIGHT, INSTRUCTIONS, BACKGROUND_COLOR, TEXT_COLOR
+from data.instructions import INSTRUCTIONS
+from constants import WINDOW_WIDTH, WINDOW_HEIGHT, BACKGROUND_COLOR, TEXT_COLOR
 
+
+"""
+TODO: Re-Write as a regular screen
+- Should be registered in GameStateManager in self.screens
+- 
+"""
 
 class InstructionsMenu:
     def __init__(self, screen):

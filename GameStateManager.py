@@ -3,8 +3,7 @@ import pygame
 import sys
 import screens.menu as menu
 import screens.playing as playing
-from enum import Enum
-from elements import Button
+import pygame_widgets
 
 
 class GameStateManager:
@@ -17,8 +16,8 @@ class GameStateManager:
 
         # All available game states/screens
         self.screens = {
-            "menu": menu.MenuScreen(self, constants.WINDOW_WIDTH),
-            "playing": playing.PlayingScreen(self, constants.WINDOW_WIDTH),
+            "menu": menu.MenuScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
+            "playing": playing.PlayingScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
             # "help": HelpScreen(self)
         }
         # On Init Default Screen is "menu"
@@ -31,16 +30,18 @@ class GameStateManager:
         while True:
             # optional delta time var
             # dt = self.clock.tick(60) / 1000
-            for event in pygame.event.get():
+            events = pygame.event.get()
+            for event in events:
                 if event.type == pygame.QUIT:
                     self.quit_game()
                 self.current_screen.handle_event(event)
             self.current_screen.update()
             self.screen.fill(constants.BLACK)
             self.current_screen.draw(self.screen)
+            pygame_widgets.update(events) # Ensures widgets render on top
             pygame.display.flip()
 
-    def quit_game():
+    def quit_game(self):
         pygame.quit()
         sys.exit()
 

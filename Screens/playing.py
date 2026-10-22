@@ -6,7 +6,7 @@ from ui.map_screen import MapScreen
 
 
 class PlayingScreen:
-    def __init__(self, manager, window_width):
+    def __init__(self, manager, window_width, window_height):
         self.manager = manager
         self.map_screen = MapScreen(
             constants.VISIBLE_MAP,
