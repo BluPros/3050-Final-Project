@@ -1,13 +1,14 @@
 import pygame
 import constants
 from ui.map_screen import MapScreen
+from screens.base_screen import Screen
 
 # Playing Screen
 
 
-class PlayingScreen:
+class PlayingScreen(Screen):
     def __init__(self, manager, window_width, window_height):
-        self.manager = manager
+        super().__init__(manager)
         self.map_screen = MapScreen(
             constants.VISIBLE_MAP,
             constants.MASK_MAP

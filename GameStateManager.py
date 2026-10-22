@@ -1,8 +1,7 @@
 import constants
 import pygame
 import sys
-import screens.menu as menu
-import screens.playing as playing
+from screens import base_screen, menu, playing
 import pygame_widgets
 
 
@@ -22,9 +21,15 @@ class GameStateManager:
         }
         # On Init Default Screen is "menu"
         self.current_screen = self.screens["menu"]
+        self.current_screen.on_enter()
 
     def change_screen(self, name):
+        # Update which screen is active (widgets)
+        self.current_screen.on_exit()
+        # Change screen for manager
         self.current_screen = self.screens[name]
+        # Show new current widgets
+        self.current_screen.on_enter()
 
     def start(self):
         while True:

@@ -1,22 +1,22 @@
 import pygame
 import constants
 from pygame_widgets.button import Button
+from screens.base_screen import Screen
 
 # Menu Screen
-# TODO: Discard elements usage, use pre-built buttons from:
-# from pygame_widgets.button import ButtonArray
+# TODO: add title/background
 
-
-class MenuScreen:
+class MenuScreen(Screen):
     def __init__(self, manager, window_width, window_height):
-        self.manager = manager
+        super().__init__(manager)
         # Button Vars
         button_width = 200
         button_height = 60
         center_x = (window_width - button_width) // 2
         center_y = (window_height - button_height) // 2
-        # Active screen buttons
-        self.buttons = [
+
+        # store buttons in self.widgets which hides and shows automatically
+        self.widgets = [
             Button(manager.screen, center_x - button_width, center_y, button_width, button_height, 
             text="Play", onClick=lambda: manager.change_screen("playing"), 
             inactiveColour=constants.LIGHT_BLUE, pressedColour=constants.WHITE),
