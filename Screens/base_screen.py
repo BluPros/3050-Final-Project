@@ -14,7 +14,7 @@ class Screen:
         for widget in self.widgets:
             widget.hide()
 
-    def handle_events(self, event):
+    def handle_event(self, event):
         pass
 
     def draw(self, surface):
