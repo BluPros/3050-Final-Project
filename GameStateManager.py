@@ -1,7 +1,7 @@
 import constants
 import pygame
 import sys
-from screens import base_screen, menu, playing
+from screens import base_screen, menu, playing, instructions
 import pygame_widgets
 
 
@@ -17,18 +17,33 @@ class GameStateManager:
         self.screens = {
             "menu": menu.MenuScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
             "playing": playing.PlayingScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
+            "instructions": instructions.InstructionScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT)
             # "help": HelpScreen(self)
         }
         # On Init Default Screen is "menu"
         self.current_screen = self.screens["menu"]
+        self.previous_screen = None
         self.current_screen.on_enter()
 
     def change_screen(self, name):
         # Update which screen is active (widgets)
         self.current_screen.on_exit()
+        # Update prev. screen
+        self.previous_screen = self.current_screen
         # Change screen for manager
         self.current_screen = self.screens[name]
         # Show new current widgets
+        self.current_screen.on_enter()
+        
+    def go_back(self):
+        # check that prev screen exists
+        if self.previous_screen is None:
+            return
+        # exit current screen
+        self.current_screen.on_exit()
+        # switch current and prev screen
+        self.current_screen, self.previous_screen = self.previous_screen, self.current_screen
+        # enter next
         self.current_screen.on_enter()
 
     def start(self):

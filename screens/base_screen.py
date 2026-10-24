@@ -14,11 +14,13 @@ class Screen:
         for widget in self.widgets:
             widget.hide()
 
+    # Should be non-widget events
     def handle_event(self, event):
         pass
 
     def draw(self, surface):
         pass
 
+    # Should be non-widget updates
     def update(self):
         pass
