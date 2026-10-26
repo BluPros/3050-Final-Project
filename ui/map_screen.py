@@ -31,6 +31,8 @@ class MapScreen:
 
         # This will be a dynamic overlay that we can use to highlight territories, show troop counts, etc. It will be drawn on top of the map image.
         self.ownership_overlay = pygame.Surface(self.map_image.get_size(), pygame.SRCALPHA)
+        
+        self.rebuild_ownership_overlay()
 
     # Get the territory at a given position on the map
     def get_territory_at(self, position):
@@ -144,4 +146,3 @@ class MapScreen:
                         )
                     )
                     
-        self.rebuild_ownership_overlay()
