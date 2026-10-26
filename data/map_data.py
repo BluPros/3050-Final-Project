@@ -17,7 +17,7 @@ territories = {
         label_position=(50, 70),
     ),
 
-    "North West Territory": Territory(
+    "Northwest Territory": Territory(
         name="Northwest Territory",
         continent="North America",
         neighbors=[
@@ -556,7 +556,7 @@ continents = {
         bonus=5,
         territories=[
             "Alaska",
-            "North west Territory",
+            "Northwest Territory",
             "Alberta",
             "Ontario",
             "Quebec",

@@ -16,5 +16,19 @@ class Territory:
     owner_id: int | None = None
     troops: int = 0
 
+    # New helper functions to manage territory ownership and troops
     def is_neighbor(self, territory_name: str) -> bool:
         return territory_name in self.neighbors
+
+    def set_owner(self, player_id: int | None):
+        self.owner_id = player_id
+
+    def add_troops(self, amount: int):
+        self.troops += amount
+
+    def remove_troops(self, amount: int) -> bool:
+        if amount > self.troops:
+            return False
+
+        self.troops -= amount
+        return True

@@ -15,3 +15,20 @@ WINDOW_HEIGHT = 720
 # MAP LAYERS
 VISIBLE_MAP = Path(__file__).parent / "assets" / "maps" / "risk_map_original.png"
 MASK_MAP = Path(__file__).parent / "assets" / "maps" / "risk_map_mask.png"
+
+# PLAYER COLORS TO SWITCH TERRITORY OWNERSHIP/COLORS
+PLAYER_RED = (210, 60, 60)
+PLAYER_BLUE = (60, 100, 210)
+PLAYER_GREEN = (60, 170, 90)
+PLAYER_YELLOW = (220, 190, 60)
+PLAYER_PURPLE = (150, 80, 190)
+PLAYER_ORANGE = (220, 130, 50)
+
+PLAYER_COLORS = [
+    PLAYER_RED,
+    PLAYER_BLUE,
+    PLAYER_GREEN,
+    PLAYER_YELLOW,
+    PLAYER_PURPLE,
+    PLAYER_ORANGE,
+]
