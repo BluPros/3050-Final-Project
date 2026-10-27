@@ -1,6 +1,6 @@
 # Instructions Screen
 from ui.instructions_menu import InstructionsMenu
-from screens.base_screen import Screen
+from Screens.base_screen import Screen
 
 class InstructionScreen(Screen):
     def __init__(self, manager, window_width, window_height):

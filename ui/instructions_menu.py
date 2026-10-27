@@ -5,7 +5,7 @@ import pygame
 import pygame_widgets
 from pygame_widgets.button import ButtonArray
 from data.instructions import INSTRUCTIONS
-from constants import WINDOW_WIDTH, WINDOW_HEIGHT, BACKGROUND_COLOR, TEXT_COLOR
+from constants import WINDOW_WIDTH, WINDOW_HEIGHT, BACKGROUND_COLOR, TEXT_COLOR, BUTTON_COLOR, BUTTON_HOVER_COLOR
 
 
 class InstructionsMenu:
@@ -46,9 +46,9 @@ class InstructionsMenu:
                       )
         )
         for button in buttons.buttons:
-            button.colour = (139, 99, 62)
+            button.colour = BUTTON_COLOR
             button.inactiveColour = (139, 99, 62)
-            button.hoverColour = (169, 135, 91)
+            button.hoverColour = BUTTON_HOVER_COLOR
             button.pressedColour = (73, 50, 31)
             button.textColour = (232, 211, 165)
         return buttons
