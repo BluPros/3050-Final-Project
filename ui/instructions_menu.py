@@ -66,36 +66,9 @@ class InstructionsMenu:
             self.screen.blit(text, (5, y))
             y += self.font.get_linesize()
 
-    # Should be useless after conversion
-    # def close_instructions(self):
-    #     self.running = False
-    #     self.visible = False
-
     def change_tab(self, tab):
         self.current_instruction = tab
         self.message = INSTRUCTIONS[self.current_instruction]
-
-    # Should be useless after conversion
-    # def run(self):
-    #     # Reset the menu each time it is opened.
-    #     self.running = True
-    #     self.visible = True
-
-    #     while self.running:
-    #         events = pygame.event.get()
-
-    #         for event in events:
-    #             if event.type == pygame.QUIT:
-    #                 self.close_instructions()
-    #                 return "quit"
-
-    #         self.screen.fill(BACKGROUND_COLOR)
-    #         self.update_text(self.message)
-
-    #         pygame_widgets.update(events)
-    #         pygame.display.flip()
-
-    #     return "closed"
 
     def draw(self, surface):
         surface.fill(BACKGROUND_COLOR)

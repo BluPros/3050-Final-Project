@@ -1,7 +1,8 @@
 import constants
 import pygame
 import sys
-from Screens import base_screen, menu, playing, instructions
+from Screens import menu, playing, instructions, new_game_screen
+from ui import new_game_menu
 import pygame_widgets
 
 
@@ -17,7 +18,8 @@ class GameStateManager:
         self.screens = {
             "menu": menu.MenuScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
             "playing": playing.PlayingScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
-            "instructions": instructions.InstructionScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT)
+            "instructions": instructions.InstructionScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
+            "new_game": new_game_screen.NewGameScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
             # "help": HelpScreen(self)
         }
         # On Init Default Screen is "menu"

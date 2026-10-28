@@ -17,16 +17,16 @@ class MenuScreen(Screen):
 
         # store buttons in self.widgets which hides and shows automatically
         self.widgets = [
-            Button(manager.screen, center_x - button_width, center_y + 100, button_width, button_height,
+            Button(manager.screen, center_x - 1.5 * button_width, center_y + 100, button_width, button_height,
                    text="New Game", onClick=lambda: manager.change_screen("new_game"),
                    inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
-            Button(manager.screen, center_x - button_width, center_y + 100, button_width, button_height,
+            Button(manager.screen, center_x - 0.5 * button_width, center_y + 100, button_width, button_height,
                    text = "Load Game", onClick=lambda: manager.change_screen("load_game"),
                    inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
-            Button(manager.screen, center_x + button_width, center_y + 100, button_width, button_height,
+            Button(manager.screen, center_x + 0.5 * button_width, center_y + 100, button_width, button_height,
                    text="Quit", onClick=manager.quit_game,
                    inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
-            Button(manager.screen, center_x, center_y + 100, button_width, button_height,
+            Button(manager.screen, center_x + 1.5 * button_width, center_y + 100, button_width, button_height,
                    text="Help", onClick=lambda: manager.change_screen("instructions"),
                    inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
         ]
