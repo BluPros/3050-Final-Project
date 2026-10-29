@@ -37,17 +37,15 @@ class PlayingScreen(Screen):
             troops=3
         )
 
-        self.game.assign_territory(
-            "Alberta",
-            player2.player_id,
-            troops=4
-        )
+    # Temporarily assign every territory to a player for testing
+        for index, territory_name in enumerate(self.game.territories):
+            player = self.game.players[index % len(self.game.players)]
 
-        self.game.assign_territory(
-            "Ontario",
-            player2.player_id,
-            troops=2
-        )
+            self.game.assign_territory(
+                territory_name,
+                player.player_id,
+                troops=1
+            )
         
 
         self.map_screen = MapScreen(

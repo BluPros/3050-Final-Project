@@ -142,7 +142,7 @@ class MapScreen:
                             player_color[0],
                             player_color[1],
                             player_color[2],
-                            90
+                            150
                         )
                     )
                     
