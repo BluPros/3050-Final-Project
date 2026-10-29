@@ -12,7 +12,6 @@ class NewGameMenu:
         self.on_exit = on_exit
         self.players = []
         self.bots = []
-        self.error_message = None
         self.widgets = self.create_widgets()
         self.hide_widgets()
 
@@ -54,7 +53,7 @@ class NewGameMenu:
         self.reconfigure_players()
 
     def remove_player(self, surface):
-        if len(self.players) + len(self.bots) > 0 :
+        if self.players:
             deleted_player = self.players.pop()
             deleted_player.left_color_button.hide()
             deleted_player.right_color_button.hide()
@@ -138,7 +137,38 @@ class NewGameMenu:
             widget.hide()
 
     def confirm(self):
-        pass
+        confirmation_message = ""
+        error_message = ""
+        # Validating bot and player counts
+        if not (len(self.players) + len(self.bots) >= 3 and len(self.players) > 0):
+            error_message += (f"Invalid number of players.\nPlease ensure you have at least 3 total players, including "
+                              f"bots. \nAt least one player has to be human.\nYou currently have {len(self.bots)}"
+                              f" bot(s) and {len(self.players)} human player(s).\n")
+        # Validating all player names
+        for index, player in enumerate(self.players):
+            if player.name_input.getText().strip() == "":
+                error_message += f"Please enter a name for player {index + 1}.\n"
+                
+        # Validate player colors
+        current_selected_colors = []
+        for icon in self.players + self.bots:
+            current_selected_colors.append(icon.player_color)
+        if len(set(current_selected_colors)) != len(current_selected_colors):
+            error_message += "Please ensure that all players have unique colors.\n"
+        
+        # If there are no errors, create confirmation message
+        if error_message == "":
+            confirmation_message += "Everything looks good! Your current players are:\n"
+            for index, player in enumerate(self.players):
+                confirmation_message += f"{index + 1}. {player.name_input.getText()}\n"
+
+            if len(self.bots) > 0:
+                confirmation_message += "Your current bots are:\n"
+            for index, bot in enumerate(self.bots):
+                confirmation_message += f"{index + 1}. {bot.name}\n"
+        print(error_message)
+        print(confirmation_message)
+
 
     def back_to_main(self):
         for icon in self.players + self.bots:
@@ -155,4 +185,5 @@ class NewGameMenu:
         for icon in icons:
             icon.right_color_button.show()
             icon.left_color_button.show()
-            icon.name_input.show()
+        for player in self.players:
+            player.name_input.show()

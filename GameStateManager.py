@@ -2,7 +2,6 @@ import constants
 import pygame
 import sys
 from Screens import menu, playing, instructions, new_game_screen
-from ui import new_game_menu
 import pygame_widgets
 
 
@@ -36,7 +35,7 @@ class GameStateManager:
         self.current_screen = self.screens[name]
         # Show new current widgets
         self.current_screen.on_enter()
-        
+
     def go_back(self):
         # check that prev screen exists
         if self.previous_screen is None:
