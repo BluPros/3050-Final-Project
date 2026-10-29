@@ -63,19 +63,20 @@ class PlayerIcon:
     def create_name_input(self):
         name_input = TextBox(
             self.surface,
-            0, 0, 170, 20,
+            0, 0, 170, 28,
             isSubWidget=False,
             colour = WHITE,
             textColour=BLACK,
+            font=pygame.font.SysFont("georgia", 12),
             onTextChanged=self.validate_text,
-            fontSize=12
+            fontSize=16,
+            placeholderText="Enter Name",
+            placeholderColor=GRAY
         )
         return name_input
 
     def validate_text(self):
         text = self.name_input.getText()
-        print("Textbox contents:", repr(text))
-
         if len(text) > 20:
             self.name_input.setText(text[:20])
 

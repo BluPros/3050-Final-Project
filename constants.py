@@ -4,6 +4,7 @@ from pathlib import Path
 # COLORS:
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+GRAY = (128, 128, 128)
 LIGHT_BLUE = (173, 216, 230)
 BUTTON_COLOR = (139, 99, 62)
 BUTTON_HOVER_COLOR = (169, 135, 91)

@@ -17,3 +17,12 @@ class NewGameScreen(Screen):
 
     def update(self):
         pass
+
+    def on_enter(self):
+        for widget in self.widgets:
+            widget.show()
+        icons = self.new_game_menu.players + self.new_game_menu.bots
+        for icon in icons:
+            icon.left_color_button.show()
+            icon.right_color_button.show()
+            icon.name_input.show()

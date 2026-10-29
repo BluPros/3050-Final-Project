@@ -53,11 +53,12 @@ class NewGameMenu:
         self.reconfigure_players()
 
     def remove_player(self, surface):
-        deleted_player = self.players.pop()
-        deleted_player.left_color_button.hide()
-        deleted_player.right_color_button.hide()
-        deleted_player.name_input.hide()
-        self.reconfigure_players()
+        if len(self.players) + len(self.bots) > 0 :
+            deleted_player = self.players.pop()
+            deleted_player.left_color_button.hide()
+            deleted_player.right_color_button.hide()
+            deleted_player.name_input.hide()
+            self.reconfigure_players()
 
     def add_bot(self, surface):
         pass
