@@ -1,4 +1,3 @@
-import constants
 import pygame
 from pygame_widgets.button import Button
 from pygame_widgets.textbox import TextBox

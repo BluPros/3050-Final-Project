@@ -1,6 +1,7 @@
 import pygame
 from constants import *
 from ui.player_icon import PlayerIcon
+from ui.bot_icon import BotIcon
 from pygame_widgets.button import Button
 
 class NewGameMenu:
@@ -61,10 +62,28 @@ class NewGameMenu:
             self.reconfigure_players()
 
     def add_bot(self, surface):
-        pass
+        if len(self.players) + len(self.bots) < 6:
+            existing_names = [
+                                 icon.name for icon in self.bots
+                             ] + [
+                                 icon.name_input.getText()
+                                 for icon in self.players
+                                 if icon.name_input.getText().strip()
+                             ]
+
+            bot = BotIcon(surface, existing_names)
+            self.bots.append(bot)
+
+        self.reconfigure_players()
 
     def remove_bot(self, surface):
-        pass
+        if self.bots:
+            deleted_bot = self.bots.pop()
+
+            deleted_bot.left_color_button.hide()
+            deleted_bot.right_color_button.hide()
+
+            self.reconfigure_players()
 
     def reconfigure_players(self):
         icons = self.players + self.bots
@@ -111,8 +130,8 @@ class NewGameMenu:
         text_rect.center = (960, 240)
         surface.blit(text_surface, text_rect)
         #redraw all icons
-        for player in self.players:
-            player.draw(surface)
+        for icon in self.players + self.bots:
+            icon.draw(surface)
 
     def hide_widgets(self):
         for widget in self.widgets:
@@ -122,12 +141,11 @@ class NewGameMenu:
         pass
 
     def back_to_main(self):
-        icons = self.players + self.bots
-        for icon in icons:
+        for icon in self.players + self.bots:
             icon.right_color_button.hide()
             icon.left_color_button.hide()
-            icon.name_input.hide()
-
+        for player in self.players:
+            player.name_input.hide()
         self.on_exit()
 
     def on_enter(self):
