@@ -2,6 +2,8 @@ import pygame
 from constants import *
 from ui.player_icon import PlayerIcon
 from ui.bot_icon import BotIcon
+from ui.popups.error_popup import ErrorPopUp
+from ui.popups.confirmation_popup import ConfirmationPopUp
 from pygame_widgets.button import Button
 
 class NewGameMenu:
@@ -14,12 +16,20 @@ class NewGameMenu:
         self.bots = []
         self.widgets = self.create_widgets()
         self.hide_widgets()
+        self.error_popup = ErrorPopUp(
+            self.surface,
+            on_close=self.show_widgets
+        )
+        self.confirmation_popup = ConfirmationPopUp(
+            self.surface,
+            on_close=self.show_widgets
+        )
 
     def create_widgets(self):
         buttons = [
             # remove player button
             Button(self.surface, 220, 220, 40, 40,
-                   text="-", onClick=lambda: self.remove_player(self.surface),
+                   text="-", onClick=lambda: self.remove_player(),
                    inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
             # add Player Button
             Button(self.surface, 380, 220, 40, 40,
@@ -27,7 +37,7 @@ class NewGameMenu:
                    inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
             # remove Bot Button
             Button(self.surface, 860, 220, 40, 40,
-                   text="-", onClick=lambda: self.remove_bot(self.surface),
+                   text="-", onClick=lambda: self.remove_bot(),
                    inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
             # add Bot Button
             Button(self.surface, 1020, 220, 40, 40,
@@ -44,6 +54,36 @@ class NewGameMenu:
         ]
         return buttons
 
+    def hide_widgets(self):
+        for widget in self.widgets:
+            widget.hide()
+
+        for icon in self.players + self.bots:
+            icon.left_color_button.hide()
+            icon.right_color_button.hide()
+
+        for player in self.players:
+            player.name_input.hide()
+
+    def show_widgets(self):
+        for widget in self.widgets:
+            widget.show()
+
+        for icon in self.players + self.bots:
+            icon.left_color_button.show()
+            icon.right_color_button.show()
+
+        for player in self.players:
+            player.name_input.show()
+
+    def show_error_popup(self, message):
+        self.hide_widgets()
+        self.error_popup.show(message)
+
+    def show_confirmation_popup(self, message):
+        self.hide_widgets()
+        self.confirmation_popup.show(message, self.start_game)
+
     def add_player(self, surface):
         # Create new player and add to list
         if len(self.players) + len(self.bots) < 6 :
@@ -52,7 +92,7 @@ class NewGameMenu:
         # Reset all player coordinates and draw them
         self.reconfigure_players()
 
-    def remove_player(self, surface):
+    def remove_player(self):
         if self.players:
             deleted_player = self.players.pop()
             deleted_player.left_color_button.hide()
@@ -75,7 +115,7 @@ class NewGameMenu:
 
         self.reconfigure_players()
 
-    def remove_bot(self, surface):
+    def remove_bot(self):
         if self.bots:
             deleted_bot = self.bots.pop()
 
@@ -131,10 +171,9 @@ class NewGameMenu:
         #redraw all icons
         for icon in self.players + self.bots:
             icon.draw(surface)
-
-    def hide_widgets(self):
-        for widget in self.widgets:
-            widget.hide()
+        # draw popups if needed and hide widgets
+        self.error_popup.draw()
+        self.confirmation_popup.draw()
 
     def confirm(self):
         confirmation_message = ""
@@ -166,8 +205,12 @@ class NewGameMenu:
                 confirmation_message += "Your current bots are:\n"
             for index, bot in enumerate(self.bots):
                 confirmation_message += f"{index + 1}. {bot.name}\n"
-        print(error_message)
-        print(confirmation_message)
+
+        if error_message:
+            self.show_error_popup(error_message)
+
+        elif confirmation_message:
+            self.show_confirmation_popup(confirmation_message)
 
 
     def back_to_main(self):
@@ -187,3 +230,6 @@ class NewGameMenu:
             icon.left_color_button.show()
         for player in self.players:
             player.name_input.show()
+
+    def start_game(self):
+        pass
