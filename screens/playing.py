@@ -2,7 +2,7 @@ import pygame
 import constants
 import random
 from ui.map_screen import MapScreen
-from screens.base_screen import Screen
+from Screens.base_screen import Screen
 from game.game_state import Game
 
 # Playing Screen
