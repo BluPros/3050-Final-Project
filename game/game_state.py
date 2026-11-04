@@ -11,15 +11,17 @@ from copy import deepcopy
 
 from data.map_data import territories as map_territories
 from game.player import Player
+from game.sean_features import SeanFeatures
 
 
-class Game:
+class Game(SeanFeatures):
     def __init__(self):
         # This is a copy of all the territories in the game, with their initial state. We will only modify the copy, not the original data.
         self.territories = deepcopy(map_territories)
 
         self.players = []
         self.current_player_index = 0
+        self._init_sean_features()
 
     # property allows us to use curren_player as a variable, but it will always return the player object for the current player index. This is useful for getting the current player without having to index into the players list manually.
     @property

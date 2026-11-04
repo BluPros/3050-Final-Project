@@ -9,6 +9,7 @@ class Player:
 
     territories: list[str] = field(default_factory=list)
     reinforcements: int = 0
+    cards: list = field(default_factory=list)
 
     # Helper functions to manage territories and reinforcements
     def add_territory(self, territory_name: str):
