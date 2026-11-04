@@ -1,7 +1,7 @@
 import constants
 import pygame
 import sys
-from Screens import menu, playing, instructions, new_game_screen
+from Screens import menu, playing_screen, instructions, new_game_screen
 import pygame_widgets
 
 
@@ -16,7 +16,7 @@ class GameStateManager:
         # All available game states/screens
         self.screens = {
             "menu": menu.MenuScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
-            "playing": playing.PlayingScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
+            "playing": playing_screen.PlayingScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
             "instructions": instructions.InstructionScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
             "new_game": new_game_screen.NewGameScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
             # "help": HelpScreen(self)

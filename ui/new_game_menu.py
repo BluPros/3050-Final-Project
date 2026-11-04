@@ -9,8 +9,6 @@ from pygame_widgets.button import Button
 class NewGameMenu:
     def __init__(self, screen, on_exit):
         self.surface = screen
-        ## on_exit is a lambda function passed in through init
-        ## should call the change menu on the last screen we were on
         self.on_exit = on_exit
         self.players = []
         self.bots = []
@@ -50,7 +48,7 @@ class NewGameMenu:
             # Confirm Button
             Button(self.surface, 800, 640, 160, 60,
                    text="Confirm", onClick=lambda: self.confirm(),
-                   inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
+                   inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR)
         ]
         return buttons
 
@@ -214,11 +212,7 @@ class NewGameMenu:
 
 
     def back_to_main(self):
-        for icon in self.players + self.bots:
-            icon.right_color_button.hide()
-            icon.left_color_button.hide()
-        for player in self.players:
-            player.name_input.hide()
+        self.hide_widgets()
         self.on_exit()
 
     def on_enter(self):

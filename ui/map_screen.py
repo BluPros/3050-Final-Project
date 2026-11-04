@@ -14,6 +14,10 @@ class MapScreen:
         # Load invisible territory mask for backend use
         self.mask_image = pygame.image.load(mask_path).convert()
 
+        # Map x,y coordinates so we can move it up and down
+        self.map_x = 0
+        self.map_y = 60
+
         # Track territory that is currently underneath mouse
         self.hovered_territory = None
 
@@ -41,7 +45,10 @@ class MapScreen:
 
     # Get the territory at a given position on the map
     def get_territory_at(self, position):
-        x, y = position
+        mouse_x, mouse_y = position
+
+        x = mouse_x - self.map_x
+        y = mouse_y - self.map_y
 
         # Ensure we are within the bounds of the map
         if x < 0 or y < 0 or x >= self.mask_image.get_width() or y >= self.mask_image.get_height():
@@ -74,10 +81,10 @@ class MapScreen:
     def draw(self, screen):
 
         # Draw the visible Risk map
-        screen.blit(self.map_image, (0, 0))
+        screen.blit(self.map_image, (self.map_x, self.map_y))
 
         # Draw the ownership overlay on top of the map
-        screen.blit(self.ownership_overlay, (0, 0))
+        screen.blit(self.ownership_overlay, (self.map_x, self.map_y))
 
         self.draw_troops(screen)
 

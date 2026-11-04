@@ -21,7 +21,7 @@ class MenuScreen(Screen):
                    text="New Game", onClick=lambda: manager.change_screen("new_game"),
                    inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
             Button(manager.screen, center_x - 0.5 * button_width, center_y + 100, button_width, button_height,
-                   text = "Load Game", onClick=lambda: manager.change_screen("load_game"),
+                   text = "Playing", onClick=lambda: manager.change_screen("playing"),
                    inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
             Button(manager.screen, center_x + 0.5 * button_width, center_y + 100, button_width, button_height,
                    text="Quit", onClick=manager.quit_game,
