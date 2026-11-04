@@ -34,6 +34,11 @@ class MapScreen:
         
         self.rebuild_ownership_overlay()
 
+        # Font for displaying troop counts on the map
+        self.troop_font = pygame.font.Font(None, 22)
+
+
+
     # Get the territory at a given position on the map
     def get_territory_at(self, position):
         x, y = position
@@ -74,11 +79,16 @@ class MapScreen:
         # Draw the ownership overlay on top of the map
         screen.blit(self.ownership_overlay, (0, 0))
 
+        self.draw_troops(screen)
+
     # Display hovered territory
         if self.hovered_territory is not None:
 
+            # Get the coordinates of the mouse position 
+            #TODO - remove the mouse_x, mouse_y variables if they are not needed for anything else
+            mouse_x, mouse_y = pygame.mouse.get_pos()
             text = self.font.render(
-                f"Hover: {self.hovered_territory.name}",
+                f"Hover: {self.hovered_territory.name} ({mouse_x}, {mouse_y})",
                 True,
                 "black"
             )
@@ -145,4 +155,47 @@ class MapScreen:
                             150
                         )
                     )
-                    
+    def draw_troops(self, screen):
+        for territory in self.game.territories.values():
+
+            
+            if territory.owner_id is None:
+                continue
+
+            player = self.game.get_player(territory.owner_id)
+
+            if player is None:
+                continue
+
+            x, y = territory.label_position
+
+            # Circle representing the territory's owner
+            pygame.draw.circle(
+                screen,
+                player.color,
+                (x, y),
+                11
+            )
+
+            # Black outline for the circle
+            pygame.draw.circle(
+                screen,
+                (0, 0, 0),
+                (x, y),
+                11,
+                2
+            )
+
+            # Number of troops
+            troop_text = self.troop_font.render(
+                str(territory.troops),
+                True,
+                (255, 255, 255)
+            )
+            
+            troop_center = troop_text.get_rect(
+                center=(x, y)
+            )
+
+            screen.blit(troop_text, troop_center)
+                        

@@ -14,8 +14,7 @@ class PlayingScreen(Screen):
         # Create the game object to store the state of the game, including players and territories
         self.game = Game()
 
-        # TESTING FOR OWNERSHIP OVERLAY
-
+        # Temporary players for testing
         player1 = self.game.add_player(
             "Player 1",
             constants.PLAYER_RED
@@ -25,26 +24,37 @@ class PlayingScreen(Screen):
             "Player 2",
             constants.PLAYER_BLUE
         )
-        self.game.assign_territory(
-            "Alaska", 
-            player1.player_id, 
-            troops=5
-        )
+        
+        # Different troop counts to test how numbers fit inside the circles
+        test_troop_counts = [
+            1,
+            2,
+            5,
+            9,
+            10,
+            15,
+            25,
+            50,
+            99
+        ]
 
-        self.game.assign_territory(
-            "Northwest Territory",
-            player1.player_id,
-            troops=3
-        )
-
-    # Temporarily assign every territory to a player for testing
+        # Temporarily assign every territory to a player for testing
         for index, territory_name in enumerate(self.game.territories):
-            player = self.game.players[index % len(self.game.players)]
+
+            # Alternate between the two players
+            player = self.game.players[
+                index % len(self.game.players)
+            ]
+
+            # Cycle through the different troop counts
+            troop_count = test_troop_counts[
+                index % len(test_troop_counts)
+            ]
 
             self.game.assign_territory(
                 territory_name,
                 player.player_id,
-                troops=1
+                troops=troop_count
             )
         
 

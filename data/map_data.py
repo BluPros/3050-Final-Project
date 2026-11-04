@@ -14,7 +14,7 @@ territories = {
             "Kamchatka"
             ],
         mask_color=(255, 0, 0),
-        label_position=(50, 70),
+        label_position=(42, 65),
     ),
 
     "Northwest Territory": Territory(
@@ -27,7 +27,7 @@ territories = {
             "Greenland"
         ],
         mask_color=(0, 255, 0),
-        label_position=(125, 70),
+        label_position=(125, 88),
     ),
 
     "Alberta": Territory(
@@ -40,7 +40,7 @@ territories = {
             "Western United States"
         ],
         mask_color=(0, 0, 255),
-        label_position=(105, 105),
+        label_position=(112, 138),
     ),
 
     "Greenland": Territory(
@@ -53,7 +53,7 @@ territories = {
             "Iceland"
         ],
         mask_color=(255, 255, 0),
-        label_position=(260, 60)
+        label_position=(262, 72)
     ),
 
     "Ontario": Territory(
@@ -68,7 +68,7 @@ territories = {
             "Alberta"
         ],
         mask_color=(255, 0, 255),
-        label_position=(165, 115)
+        label_position=(153, 120)
     ),
 
     "Quebec": Territory(
@@ -80,7 +80,7 @@ territories = {
             "Eastern United States"
         ],
         mask_color=(0, 255, 255),
-        label_position=(220, 115)
+        label_position=(208, 149)
     ),
 
     "Western United States": Territory(
@@ -93,7 +93,7 @@ territories = {
             "Central America"
         ],
         mask_color=(255, 128, 0),
-        label_position=(110, 155)
+        label_position=(105, 204)
     ),
 
     "Eastern United States": Territory(
@@ -106,7 +106,7 @@ territories = {
             "Central America"
         ],
         mask_color=(128, 0, 255),
-        label_position=(180, 160)
+        label_position=(197, 190)
     ),
 
     "Central America": Territory(
@@ -118,7 +118,7 @@ territories = {
             "Venezuela"
         ],
         mask_color=(0, 128, 255),
-        label_position=(130, 210)
+        label_position=(140, 262)
     ),
 
     "Venezuela": Territory(
@@ -130,7 +130,7 @@ territories = {
             "Brazil"
         ],
         mask_color=(128, 255, 0),
-        label_position=(205, 265)
+        label_position=(163, 315)
     ),
 
     "Peru": Territory(
@@ -142,7 +142,7 @@ territories = {
             "Argentina"
         ],
         mask_color=(255, 0, 128),
-        label_position=(195, 325)
+        label_position=(147, 338)
     ),
 
     "Brazil": Territory(
@@ -155,7 +155,7 @@ territories = {
             "North Africa"
         ],
         mask_color=(0, 255, 128),
-        label_position=(250, 315)
+        label_position=(245, 380)
     ),
 
     "Argentina": Territory(
@@ -166,7 +166,7 @@ territories = {
             "Brazil"
         ],
         mask_color=(128, 128, 255),
-        label_position=(220, 405)
+        label_position=(190, 455)
     ),
 
     "Iceland": Territory(
@@ -178,7 +178,7 @@ territories = {
             "Scandinavia"
         ],
         mask_color=(255, 128, 128),
-        label_position=(350, 105)
+        label_position=(328, 114)
     ),
 
     "Scandinavia": Territory(
@@ -191,7 +191,7 @@ territories = {
             "Ukraine"
         ],
         mask_color=(128, 255, 128),
-        label_position=(420, 105)
+        label_position=(394, 123)
     ),
 
     "Ukraine": Territory(
@@ -206,7 +206,7 @@ territories = {
             "Ural"
         ],
         mask_color=(128, 128, 0),
-        label_position=(490, 135)
+        label_position=(458, 169)
     ),
 
     "Great Britain": Territory(
@@ -219,7 +219,7 @@ territories = {
             "Western Europe"
         ],
         mask_color=(128, 0, 128),
-        label_position=(350, 155)
+        label_position=(330, 180)
     ),
 
     "Northern Europe": Territory(
@@ -233,7 +233,7 @@ territories = {
             "Western Europe"
         ],
         mask_color=(0, 128, 128),
-        label_position=(420, 160)
+        label_position=(404, 160)
     ),
 
     "Western Europe": Territory(
@@ -246,7 +246,7 @@ territories = {
             "North Africa"
         ],
         mask_color=(192, 64, 0),
-        label_position=(365, 205)
+        label_position=(345, 265)
     ),
 
     "Southern Europe": Territory(
@@ -261,7 +261,7 @@ territories = {
             "North Africa"
         ],
         mask_color=(64, 0, 192),
-        label_position=(430, 205)
+        label_position=(412, 244)
     ),
 
     "North Africa": Territory(
@@ -276,7 +276,7 @@ territories = {
             "Congo"
         ],
         mask_color=(192, 0, 64),
-        label_position=(375, 285)
+        label_position=(360, 317)
     ),
 
     "Egypt": Territory(
@@ -289,7 +289,7 @@ territories = {
             "East Africa"
         ],
         mask_color=(64, 192, 0),
-        label_position=(445, 270)
+        label_position=(404, 307)
     ),
 
     "East Africa": Territory(
@@ -304,7 +304,7 @@ territories = {
             "Middle East"
         ],
         mask_color=(0, 64, 192),
-        label_position=(470, 335)
+        label_position=(450, 350)
     ),
 
     "Congo": Territory(
@@ -316,7 +316,7 @@ territories = {
             "South Africa"
         ],
         mask_color=(192, 192, 0),
-        label_position=(410, 350)
+        label_position=(423, 387)
     ),
 
     "South Africa": Territory(
@@ -328,7 +328,7 @@ territories = {
             "Madagascar"
         ],
         mask_color=(192, 0, 192),
-        label_position=(425, 420)
+        label_position=(430, 500)
     ),
 
     "Madagascar": Territory(
@@ -339,7 +339,7 @@ territories = {
             "East Africa"
         ],
         mask_color=(0, 192, 192),
-        label_position=(500, 420)
+        label_position=(520, 435)
     ),
 
     "Ural": Territory(
@@ -352,7 +352,7 @@ territories = {
             "Afghanistan"
         ],
         mask_color=(255, 192, 0),
-        label_position=(555, 105)
+        label_position=(545, 105)
     ),
 
     "Siberia": Territory(
@@ -366,7 +366,7 @@ territories = {
             "Yakutsk"
         ],
         mask_color=(255, 64, 64),
-        label_position=(610, 80)
+        label_position=(595, 105)
     ),
 
     "Yakutsk": Territory(
@@ -378,7 +378,7 @@ territories = {
             "Kamchatka"
         ],
         mask_color=(64, 255, 64),
-        label_position=(675, 65)
+        label_position=(645, 75)
     ),
 
     "Kamchatka": Territory(
@@ -392,7 +392,7 @@ territories = {
             "Alaska"
         ],
         mask_color=(64, 64, 255),
-        label_position=(745, 80)
+        label_position=(715, 75)
     ),
 
     "Irkutsk": Territory(
@@ -405,7 +405,7 @@ territories = {
             "Mongolia"
         ],
         mask_color=(255, 64, 192),
-        label_position=(660, 120)
+        label_position=(630, 145)
     ),
 
     "Mongolia": Territory(
@@ -419,7 +419,7 @@ territories = {
             "China"
         ],
         mask_color=(64, 255, 192),
-        label_position=(655, 165)
+        label_position=(650, 200)
     ),
 
     "Japan": Territory(
@@ -430,7 +430,7 @@ territories = {
             "Mongolia"
         ],
         mask_color=(192, 64, 255),
-        label_position=(745, 175)
+        label_position=(725, 205)
     ),
 
     "Afghanistan": Territory(
@@ -444,7 +444,7 @@ territories = {
             "Middle East"
         ],
         mask_color=(192, 255, 64),
-        label_position=(550, 175)
+        label_position=(535, 215)
     ),
 
     "China": Territory(
@@ -459,7 +459,7 @@ territories = {
             "Afghanistan"
         ],
         mask_color=(255, 192, 192),
-        label_position=(620, 210)
+        label_position=(600, 220)
     ),
 
     "Middle East": Territory(
@@ -474,7 +474,7 @@ territories = {
             "Southern Europe"
         ],
         mask_color=(192, 255, 192),
-        label_position=(515, 235)
+        label_position=(485, 290)
     ),
 
     "India": Territory(
@@ -487,7 +487,7 @@ territories = {
             "Siam"
         ],
         mask_color=(192, 192, 255),
-        label_position=(585, 250)
+        label_position=(560, 255)
     ),
 
     "Siam": Territory(
@@ -499,7 +499,7 @@ territories = {
             "Indonesia"
         ],
         mask_color=(255, 128, 192),
-        label_position=(650, 265)
+        label_position=(629, 288)
     ),
 
     "Indonesia": Territory(
@@ -511,7 +511,7 @@ territories = {
             "Western Australia"
         ],
         mask_color=(128, 255, 192),
-        label_position=(650, 340)
+        label_position=(650, 405)
     ),
 
     "New Guinea": Territory(
@@ -523,7 +523,7 @@ territories = {
             "Eastern Australia"
         ],
         mask_color=(192, 128, 255),
-        label_position=(730, 335)
+        label_position=(705, 355)
     ),
 
     "Western Australia": Territory(
@@ -535,7 +535,7 @@ territories = {
             "Eastern Australia"
         ],
         mask_color=(255, 192, 128),
-        label_position=(680, 415)
+        label_position=(695, 450)
     ),
 
     "Eastern Australia": Territory(
@@ -546,7 +546,7 @@ territories = {
             "Western Australia"
         ],
         mask_color=(128, 192, 255),
-        label_position=(745, 415)
+        label_position=(760, 495)
     ),
 }
 
