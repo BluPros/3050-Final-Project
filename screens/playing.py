@@ -1,7 +1,7 @@
 import pygame
 import constants
 from ui.map_screen import MapScreen
-from Screens.base_screen import Screen
+from screens.base_screen import Screen
 from game.game_state import Game
 
 # Playing Screen

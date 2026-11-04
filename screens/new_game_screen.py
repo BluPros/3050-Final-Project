@@ -1,6 +1,6 @@
 # New Game Screen
 from ui.new_game_menu import NewGameMenu
-from Screens.base_screen import Screen
+from screens.base_screen import Screen
 
 class NewGameScreen(Screen):
     def __init__(self, manager, window_width, window_height):
