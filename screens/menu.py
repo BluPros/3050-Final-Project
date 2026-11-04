@@ -1,7 +1,7 @@
 import pygame
 from constants import WHITE, BACKGROUND_COLOR, BUTTON_COLOR, BUTTON_HOVER_COLOR, TEXT_COLOR
 from pygame_widgets.button import Button
-from Screens.base_screen import Screen
+from screens.base_screen import Screen
 
 # Menu Screen
 # TODO: add title/background
