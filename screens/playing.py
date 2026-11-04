@@ -26,6 +26,18 @@ class PlayingScreen(Screen):
             constants.PLAYER_BLUE,
             is_bot=True
         )
+        # Temporary players for testing
+        self.game.add_player(
+            "Player 3",
+            constants.PLAYER_GREEN,
+            is_bot=True
+        )
+
+        self.game.add_player(
+            "Player 4",
+            constants.PLAYER_YELLOW,
+            is_bot=True
+        )
 
         self.game.start_setup()
 
@@ -38,6 +50,7 @@ class PlayingScreen(Screen):
             constants.MASK_MAP,
             self.game
         )
+
         # Delay between bot actions in milliseconds
         self.bot_delay = 1000
 
@@ -48,33 +61,44 @@ class PlayingScreen(Screen):
     def handle_event(self, event):
         self.map_screen.handle_click(event)
 
-        # Territory claiming with the mouse
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 
-            # Only allow human players to claim territories
             player = self.game.current_player
 
+            # Only human players use mouse clicks
             if player is not None and not player.is_bot:
 
                 territory = self.map_screen.get_territory_at(event.pos)
 
                 if territory is not None:
-                    claimed = self.game.claim_territory(territory.name)
 
-                    if claimed:
-                        self.map_screen.rebuild_ownership_overlay()
+                    if self.game.phase == "setup_claim":
 
-                        # Record the time of the last bot action for potential bot turn management
-                        self.last_bot_action = pygame.time.get_ticks()
+                        claimed = self.game.claim_territory(territory.name)
 
-                        print(
-                            f"{player.name} claimed {territory.name}"
-                        )
+                        if claimed:
+                            self.map_screen.rebuild_ownership_overlay()
+                            self.last_bot_action = pygame.time.get_ticks()
 
-        # Temporary use of space to advance turns before we have the button implemented by tre
+                            print(
+                                f"{player.name} claimed {territory.name}"
+                            )
+
+                    elif self.game.phase == "setup_place":
+
+                        placed = self.game.place_setup_army(territory.name)
+
+                        if placed:
+                            self.last_bot_action = pygame.time.get_ticks()
+
+                            print(
+                                f"{player.name} placed an army on {territory.name}"
+                            )
+
+        # Temporary keyboard control for normal turns
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
 
-            if self.game.game_started:
+            if self.game.game_started and self.game.phase != "game_over":
                 self.game.next_phase()
 
                 print(

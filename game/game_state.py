@@ -107,6 +107,55 @@ class Game:
             self.next_player()
 
         return True
+
+    def place_setup_army(self, territory_name):
+        # Only allow army placement during the setup phase
+        if self.phase != "setup_place":
+            return False
+
+        player = self.current_player
+
+        if player is None:
+            return False
+
+        territory = self.territories.get(territory_name)
+
+        # Players can only reinforce territories they own
+        if territory is None or territory.owner_id != player.player_id:
+            return False
+
+        # Make sure the player has armies left to place
+        if self.setup_armies[player.player_id] <= 0:
+            return False
+
+        # Add one troop to the selected territory
+        territory.troops += 1
+
+        # Subtract one from the player's remaining armies
+        self.setup_armies[player.player_id] -= 1
+
+        # Check whether all players have finished placing armies
+        all_placed = all(
+            armies == 0
+            for armies in self.setup_armies.values()
+        )
+
+        if all_placed:
+            self.start_game()
+        else:
+            self.next_setup_player()
+
+        return True
+
+    def next_setup_player(self):
+        # Move to the next player who still has armies to place
+        for _ in range(len(self.players)):
+            self.next_player()
+
+            player = self.current_player
+
+            if self.setup_armies[player.player_id] > 0:
+                return
     
     # Simple method for advancing to the next player's turn
     def next_player(self):
@@ -171,6 +220,7 @@ class Game:
         elif self.phase == "fortify":
             self.end_turn()
 
+    # Ends the current player's turn, advancing to the next player and resetting the phase to "deploy".
     def end_turn(self):
         if not self.game_started or self.phase == "game_over":
             return
