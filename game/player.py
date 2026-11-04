@@ -9,6 +9,8 @@ class Player:
 
     territories: list[str] = field(default_factory=list)
     reinforcements: int = 0
+    
+    is_bot: bool = False
 
     # Helper functions to manage territories and reinforcements
     def add_territory(self, territory_name: str):

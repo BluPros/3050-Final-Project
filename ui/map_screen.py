@@ -81,6 +81,18 @@ class MapScreen:
 
         self.draw_troops(screen)
 
+        # Show the current player and phase
+        current_player = self.game.current_player
+
+        if current_player is not None:
+            turn_text = self.font.render(
+                f"{current_player.name} - {self.game.phase.upper()}",
+                True,
+                (255, 255, 255)
+            )
+
+            screen.blit(turn_text, (900, 120))
+
     # Display hovered territory
         if self.hovered_territory is not None:
 
@@ -155,6 +167,7 @@ class MapScreen:
                             150
                         )
                     )
+
     def draw_troops(self, screen):
         for territory in self.game.territories.values():
 
