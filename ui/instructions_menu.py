@@ -5,7 +5,7 @@ import pygame
 import pygame_widgets
 from pygame_widgets.button import ButtonArray
 from data.instructions import INSTRUCTIONS
-from constants import WINDOW_WIDTH, WINDOW_HEIGHT, BACKGROUND_COLOR, TEXT_COLOR
+from constants import WINDOW_WIDTH, WINDOW_HEIGHT, BACKGROUND_COLOR, TEXT_COLOR, BUTTON_COLOR, BUTTON_HOVER_COLOR
 
 
 class InstructionsMenu:
@@ -46,9 +46,9 @@ class InstructionsMenu:
                       )
         )
         for button in buttons.buttons:
-            button.colour = (139, 99, 62)
+            button.colour = BUTTON_COLOR
             button.inactiveColour = (139, 99, 62)
-            button.hoverColour = (169, 135, 91)
+            button.hoverColour = BUTTON_HOVER_COLOR
             button.pressedColour = (73, 50, 31)
             button.textColour = (232, 211, 165)
         return buttons
@@ -66,36 +66,9 @@ class InstructionsMenu:
             self.screen.blit(text, (5, y))
             y += self.font.get_linesize()
 
-    # Should be useless after conversion
-    # def close_instructions(self):
-    #     self.running = False
-    #     self.visible = False
-
     def change_tab(self, tab):
         self.current_instruction = tab
         self.message = INSTRUCTIONS[self.current_instruction]
-
-    # Should be useless after conversion
-    # def run(self):
-    #     # Reset the menu each time it is opened.
-    #     self.running = True
-    #     self.visible = True
-
-    #     while self.running:
-    #         events = pygame.event.get()
-
-    #         for event in events:
-    #             if event.type == pygame.QUIT:
-    #                 self.close_instructions()
-    #                 return "quit"
-
-    #         self.screen.fill(BACKGROUND_COLOR)
-    #         self.update_text(self.message)
-
-    #         pygame_widgets.update(events)
-    #         pygame.display.flip()
-
-    #     return "closed"
 
     def draw(self, surface):
         surface.fill(BACKGROUND_COLOR)
