@@ -1,7 +1,7 @@
 import constants
 import pygame
 import sys
-from Screens import menu, playing_screen, instructions, new_game_screen
+from screens import menu, playing_screen, instructions, new_game_screen
 import pygame_widgets
 
 
