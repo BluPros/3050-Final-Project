@@ -25,12 +25,12 @@ class PlayingOverlay:
         widgets = [
             # End Phase Button
             Button(self.surface, 1130, 670, 140, 40,
-                   text="End Phase", onClick=self.end_phase(),
+                   text="End Phase", onClick=self.end_phase,
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR),
             # Help Menu Button
             Button(self.surface, 980, 670, 140, 40,
-                   text = "Help", onClick=self.end_phase(),
+                   text = "Help", onClick=self.end_phase,
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR),
         ]
