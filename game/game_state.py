@@ -104,6 +104,14 @@ class Game:
         if all_claimed:
             self.phase = "setup_place"
             self.current_player_index = 0
+            print("\n--- END OF CLAIMING ---")
+
+            for player in self.players:
+                print(
+                    player.name,
+                    "Territories:", len(player.territories),
+                    "Remaining armies:", self.setup_armies[player.player_id]
+                )
         else:
             self.next_player()
 
@@ -158,16 +166,23 @@ class Game:
             if self.setup_armies[player.player_id] > 0:
                 return
     
-    # Simple method for advancing to the next player's turn
+    # Method for advancing to the next player's turn
     def next_player(self):
-        if not self.players:
+        if not self.players or self.phase == "game_over":
             return
 
-        self.current_player_index += 1
+        # Check each player until we find someone who can take a turn
+        for _ in range(len(self.players)):
 
-        # Update the current player reference to the new player at the current index
-        if self.current_player_index >= len(self.players):
-            self.current_player_index = 0
+            self.current_player_index += 1
+
+            if self.current_player_index >= len(self.players):
+                self.current_player_index = 0
+
+            # During setup, everyone gets a turn.
+            # After setup, eliminated players are skipped.
+            if not self.game_started or not self.current_player.eliminated:
+                return
 
     # Starts the game by setting the current player to the first player, marking the game as started, and setting the initial phase to "deploy".
     def start_game(self):
@@ -199,7 +214,8 @@ class Game:
         self.setup_armies = {}
 
         for player in self.players:
-            self.setup_armies[player.player_id] = army_count
+            player.eliminated = False
+            sel.setup_armies[player.player_id] = army_count
 
         player_card_x = constants.CARD_X_POSITIONS.get(len(self.players), [])
         x: int
@@ -279,3 +295,38 @@ class Game:
             new_player_id,
             incoming_troops # <-- This is the number of troops that the new owner is moving in with
         )
+
+        # After changing ownership, check if any players have been eliminated or if there is a winner   
+        self.check_eliminations_and_winner()
+
+    def check_eliminations_and_winner(self):
+
+        # Make sure no one is elimiated before or after the start of the traditional game loop
+        if not self.game_started or self.phase == "game_over":
+            return
+
+        # Check whether any player has lost all their territories to eliminate them from the game
+        for player in self.players:
+
+            if not player.eliminated and player.territory_count() == 0:
+                player.eliminated = True
+                print(f"{player.name} has been eliminated")
+
+        # Find players who have not been eliminated
+        active_players = [
+            player for player in self.players
+            if not player.eliminated
+        ]
+
+        # The last player must control the entire map to win
+        if len(active_players) == 1 and all(
+            territory.owner_id == active_players[0].player_id
+            for territory in self.territories.values()
+        ):
+
+            winner = active_players[0]
+
+            self.winner_id = winner.player_id
+            self.phase = "game_over"
+
+            print(f"{winner.name} has won the game!")

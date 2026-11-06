@@ -13,6 +13,7 @@ class Player:
     reinforcements: int = 0
     
     is_bot: bool = False
+    eliminated: bool = False
 
     # Details for drawing player cards on playing screen
     x_center = 0
