@@ -106,15 +106,20 @@ class MapScreen:
             )
 
         if self.game.phase == "setup_place":
-            remaining = self.game.setup_armies[current_player.player_id]
+            for index, player in enumerate(self.game.players):
+                remaining = self.game.setup_armies[player.player_id]
 
-            remaining_troop_text = self.font.render(
-                f"Remaining troops: {remaining}",
-                True,
-                "white"
-            )
+                remaining_text = self.font.render(
+                    f"{player.name}: {remaining} left",
+                    True,
+                    player.color
+                )
 
-            screen.blit(remaining_troop_text, (900, 150))
+                screen.blit(
+                    remaining_text,
+                    (900, 150 + index * 30)
+                )
+
             screen.blit(turn_text, (900, 120))
 
     # Display hovered territory

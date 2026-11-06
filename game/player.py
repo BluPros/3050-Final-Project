@@ -11,6 +11,7 @@ class Player:
     reinforcements: int = 0
     
     is_bot: bool = False
+    eliminated: bool = False
 
     # Helper functions to manage territories and reinforcements
     def add_territory(self, territory_name: str):
