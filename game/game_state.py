@@ -289,7 +289,10 @@ class Game:
             new_player_id,
             incoming_troops # <-- This is the number of troops that the new owner is moving in with
         )
-        
+
+        # After changing ownership, check if any players have been eliminated or if there is a winner   
+        self.check_eliminations_and_winner()
+
     def check_eliminations_and_winner(self):
 
         # Make sure no one is elimiated before or after the start of the traditional game loop
