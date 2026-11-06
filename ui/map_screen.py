@@ -95,22 +95,23 @@ class MapScreen:
             turn_text = self.font.render(
                 f"{current_player.name} - {self.game.phase.upper()}",
                 True,
-                (255, 255, 255)
+                "white"
             )
 
         if current_player is not None:
             turn_text = self.font.render(
                 f"{current_player.name} - {self.game.phase.upper()}",
                 True,
-                (255, 255, 255)
+                "white"
             )
 
-        if self.game.phase == "setup_phase":
-            remaining = current_player.troops
+        if self.game.phase == "setup_place":
+            remaining = self.game.setup_armies[current_player.player_id]
+
             remaining_troop_text = self.font.render(
                 f"Remaining troops: {remaining}",
                 True,
-                (255, 255, 255)
+                "white"
             )
 
             screen.blit(remaining_troop_text, (900, 150))
@@ -125,7 +126,7 @@ class MapScreen:
             text = self.font.render(
                 f"Hover: {self.hovered_territory.name} ({mouse_x}, {mouse_y})",
                 True,
-                "black"
+                "white"
             )
 
             screen.blit(text, (20, 20))
@@ -136,7 +137,7 @@ class MapScreen:
             text = self.font.render(
                 f"Selected: {self.selected_territory.name}",
                 True,
-                "black"
+                "white"
             )
 
             screen.blit(text, (20, 50))
