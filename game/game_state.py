@@ -12,15 +12,17 @@ from copy import deepcopy
 import constants
 from data.map_data import territories as map_territories
 from game.player import Player
+from game.sean_features import SeanFeatures
 
 
-class Game:
+class Game(SeanFeatures):
     def __init__(self):
         # This is a copy of all the territories in the game, with their initial state. We will only modify the copy, not the original data.
         self.territories = deepcopy(map_territories)
 
         self.players = []
         self.current_player_index = 0
+        self._init_sean_features()
 
         # Track the current stage of the game
         self.phase = "setup_claim"
