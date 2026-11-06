@@ -8,6 +8,7 @@ from ui.playing import PlayingOverlay
 
 # Playing Screen
 
+
 class PlayingScreen(Screen):
     def __init__(self, manager, window_width, window_height):
         super().__init__(manager)
@@ -121,43 +122,73 @@ class PlayingScreen(Screen):
     def update(self):
         self.map_screen.update()
 
-        # Bots only act during territory claiming for now will try to implement fully this sprint
-        if self.game.phase != "setup_claim":
+        # Bots act during both setup phases
+        if self.game.phase not in ("setup_claim", "setup_place"):
             return
 
         player = self.game.current_player
 
+        # Human players control their own turns
         if player is None or not player.is_bot:
             return
 
         current_time = pygame.time.get_ticks()
 
-        # Potentially how we want to delay the bots action so that it is visible to human players
+        # Wait one second between bot actions
         if current_time - self.last_bot_action < self.bot_delay:
             return
 
-        # Right now the bot will randomly choose available territories and claim them during setup
-        available_territories = [
-            territory.name
-            for territory in self.game.territories.values()
-            if territory.owner_id is None
-        ]
+        if self.game.phase == "setup_claim":
 
-        if not available_territories:
-            return
+            # Find territories that have not been claimed
+            available_territories = [
+                territory.name
+                for territory in self.game.territories.values()
+                if territory.owner_id is None
+            ]
 
-        # Randomly choose one available territory
-        territory_name = random.choice(available_territories)
+            if not available_territories:
+                return
 
-        claimed = self.game.claim_territory(territory_name)
+            territory_name = random.choice(available_territories)
 
-        if claimed:
-            self.map_screen.rebuild_ownership_overlay()
-            self.last_bot_action = current_time
+            claimed = self.game.claim_territory(territory_name)
 
-            print(
-                f"{player.name} claimed {territory_name}"
-            )
+            if claimed:
+                self.map_screen.rebuild_ownership_overlay()
+
+                print(
+                    f"{player.name} claimed {territory_name}"
+                )
+
+        elif self.game.phase == "setup_place":
+
+            # Find territories owned by the current bot
+            owned_territories = [
+                territory.name
+                for territory in self.game.territories.values()
+                if territory.owner_id == player.player_id
+            ]
+
+            if not owned_territories:
+                return
+
+            territory_name = random.choice(owned_territories)
+
+            placed = self.game.place_setup_army(territory_name)
+
+            if placed:
+                print(
+                    f"{player.name} placed an army on {territory_name}"
+                )
+
+                print(
+                    f"Remaining armies: "
+                    f"{self.game.setup_armies[player.player_id]}"
+                )
+
+        # Restart the timer after the bot action
+        self.last_bot_action = current_time
 
     def on_enter(self):
         for widget in self.widgets:
