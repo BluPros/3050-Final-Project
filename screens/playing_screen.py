@@ -4,9 +4,9 @@ import random
 from ui.map_screen import MapScreen
 from screens.base_screen import Screen
 from game.game_state import Game
+from ui.playing import PlayingOverlay
 
 # Playing Screen
-
 
 class PlayingScreen(Screen):
     def __init__(self, manager, window_width, window_height):
@@ -15,7 +15,12 @@ class PlayingScreen(Screen):
         # Create the game object to store the state of the game, including players and territories
         self.game = Game()
 
-        # Temporary players for testing
+        # Create the playing overlay
+        self.playing_overlay = PlayingOverlay(screen=manager.screen, on_exit=manager.go_back)
+        self.widgets = self.playing_overlay.widgets
+
+        # TESTING FOR OWNERSHIP OVERLAY
+
         self.game.add_player(
             "Player 1",
             constants.PLAYER_RED
@@ -107,7 +112,11 @@ class PlayingScreen(Screen):
                 )
 
     def draw(self, surface):
+        surface.fill(constants.BACKGROUND_COLOR)
         self.map_screen.draw(surface)
+        self.playing_overlay.draw(surface)
+        for player in self.game.players:
+            player.draw(surface)
 
     def update(self):
         self.map_screen.update()
@@ -149,3 +158,7 @@ class PlayingScreen(Screen):
             print(
                 f"{player.name} claimed {territory_name}"
             )
+
+    def on_enter(self):
+        for widget in self.widgets:
+            widget.show()

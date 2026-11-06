@@ -2,14 +2,13 @@ import pygame
 from ui.popups.error_popup import ErrorPopUp
 from ui.popups.confirmation_popup import ConfirmationPopUp
 from pygame_widgets.button import Button
-from constants import *
+import constants
 
 class PlayingOverlay:
     def __init__(self, screen, on_exit):
         self.surface = screen
         self.on_exit = on_exit
         self.players = []
-        self.bots = []
         self.widgets = self.create_widgets()
         self.hide_widgets()
         self.error_popup = ErrorPopUp(
@@ -21,16 +20,19 @@ class PlayingOverlay:
             on_close=self.show_widgets
         )
 
+
     def create_widgets(self):
         widgets = [
             # End Phase Button
             Button(self.surface, 1130, 670, 140, 40,
                    text="End Phase", onClick=self.end_phase(),
-                   inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
+                   inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
+                   hoverColour=constants.BUTTON_HOVER_COLOR),
             # Help Menu Button
             Button(self.surface, 980, 670, 140, 40,
                    text = "Help", onClick=self.end_phase(),
-                   inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
+                   inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
+                   hoverColour=constants.BUTTON_HOVER_COLOR),
         ]
         return widgets
 
@@ -42,12 +44,17 @@ class PlayingOverlay:
         for widget in self.widgets:
             widget.show()
 
+    def configure_player_cards(self, players):
+        player_x_coordinates = constants.CARD_X_POSITIONS.get(len(players), [])
+        for player, x in zip(players, player_x_coordinates):
+            player.x_center = x
+
     def draw(self, surface):
         # Title
-        font = pygame.font.SysFont("georgia", 52)
-        text_surface = font.render("Player Initiation", True, TEXT_COLOR)
+        font = pygame.font.SysFont(constants.FONT_STYLE, 30)
+        text_surface = font.render("Playing Screen", True, constants.TEXT_COLOR)
         text_rect = text_surface.get_rect()
-        text_rect.center = (640, 80)
+        text_rect.center = (640, 30)
         surface.blit(text_surface, text_rect)
 
     def on_enter(self):

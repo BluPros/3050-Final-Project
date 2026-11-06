@@ -9,6 +9,7 @@
 #############################################
 from copy import deepcopy
 
+import constants
 from data.map_data import territories as map_territories
 from game.player import Player
 
@@ -199,6 +200,11 @@ class Game:
 
         for player in self.players:
             self.setup_armies[player.player_id] = army_count
+
+        player_card_x = constants.CARD_X_POSITIONS.get(len(self.players), [])
+        x: int
+        for player, x in zip(self.players, player_card_x):
+            player.x_center = x
 
         return True
 

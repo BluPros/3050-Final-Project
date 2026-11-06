@@ -1,4 +1,6 @@
 import pygame
+
+import constants
 from constants import *
 from ui.player_icon import PlayerIcon
 from ui.bot_icon import BotIcon
@@ -133,19 +135,19 @@ class NewGameMenu:
     def draw(self, surface):
         surface.fill(BACKGROUND_COLOR)
         # Title
-        font = pygame.font.SysFont("georgia", 52)
+        font = pygame.font.SysFont(constants.FONT_STYLE, 52)
         text_surface = font.render("Player Initiation", True, TEXT_COLOR)
         text_rect = text_surface.get_rect()
         text_rect.center = (640, 80)
         surface.blit(text_surface, text_rect)
         # Select # of Players
-        font = pygame.font.SysFont("georgia", 24)
+        font = pygame.font.SysFont(constants.FONT_STYLE, 24)
         text_surface = font.render("Select Number of Players", True, TEXT_COLOR)
         text_rect = text_surface.get_rect()
         text_rect.center = (320, 160)
         surface.blit(text_surface, text_rect)
         # Select # of Bots
-        font = pygame.font.SysFont("georgia", 24)
+        font = pygame.font.SysFont(constants.FONT_STYLE, 24)
         text_surface = font.render("Select Number of Bots", True, TEXT_COLOR)
         text_rect = text_surface.get_rect()
         text_rect.center = (960, 160)
@@ -153,7 +155,7 @@ class NewGameMenu:
         # Player count box and text
         player_box = pygame.Rect(290, 210, 60, 60)
         pygame.draw.rect(surface, PLAYER_ICON_COLOR, player_box)
-        font = pygame.font.SysFont("georgia", 24)
+        font = pygame.font.SysFont(constants.FONT_STYLE, 24)
         text_surface = font.render(f"{len(self.players)}", True, TEXT_COLOR)
         text_rect = text_surface.get_rect()
         text_rect.center = (320, 240)
@@ -161,7 +163,7 @@ class NewGameMenu:
         # Bot count box and text
         bot_box = pygame.Rect(930, 210, 60, 60)
         pygame.draw.rect(surface, BOT_ICON_COLOR, bot_box)
-        font = pygame.font.SysFont("georgia", 24)
+        font = pygame.font.SysFont(constants.FONT_STYLE, 24)
         text_surface = font.render(f"{len(self.bots)}", True, TEXT_COLOR)
         text_rect = text_surface.get_rect()
         text_rect.center = (960, 240)

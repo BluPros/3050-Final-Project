@@ -1,5 +1,5 @@
 import pygame
-from constants import WHITE, BACKGROUND_COLOR, BUTTON_COLOR, BUTTON_HOVER_COLOR, TEXT_COLOR
+from constants import *
 from pygame_widgets.button import Button
 from screens.base_screen import Screen
 
@@ -38,7 +38,7 @@ class MenuScreen(Screen):
         # pygame_widgets draw the buttons, draw title/background here
         ## Title
         surface.fill(BACKGROUND_COLOR)
-        font = pygame.font.SysFont("georgia", 52)
+        font = pygame.font.SysFont(FONT_STYLE, 52)
         text_surface = font.render("Risk! Global Domination.", True, TEXT_COLOR)
         text_rect = text_surface.get_rect()
         text_rect.center = (self.center_x, self.center_y)
