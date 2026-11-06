@@ -57,6 +57,160 @@ class PlayingOverlay:
         text_rect.center = (640, 30)
         surface.blit(text_surface, text_rect)
 
+    def draw_text(self, message, x, y, font_size, font_color=constants.TEXT_COLOR):
+        # Make font object
+        font = pygame.font.SysFont(constants.FONT_STYLE, font_size)
+        # update the text
+        text = font.render(message, True, font_color)
+        # Write text to screen
+        text_rect = text.get_rect(center=(x, y))
+        self.surface.blit(text, text_rect)
+
+    def draw_claim(self, player, hover_territory=None):
+        # Background Rectangle
+        background_rect = pygame.Rect(
+            constants.PANEL_X_LEFT, constants.PANEL_Y_TOP, constants.PANEL_WIDTH, constants.PANEL_HEIGHT
+        )
+        pygame.draw.rect(
+            self.surface, constants.CLAIM_COLOR, background_rect
+        )
+        # Selected territory box
+        selected_terr_rect = pygame.Rect(
+            constants.PANEL_X_LEFT + 20 , constants.PANEL_Y_TOP + 240, constants.PANEL_WIDTH - 40, 100
+        )
+        pygame.draw.rect(
+            self.surface, constants.WHITE, selected_terr_rect
+        )
+        # Title
+        self.draw_text(
+            message="Claim Territory",
+            x=constants.PANEL_X_CENTER,
+            y=constants.PANEL_Y_TOP + 30,
+            font_size=40,
+            font_color=constants.TEXT_COLOR
+        )
+
+        # Draw Player Name
+        self.draw_text(
+            message=player.name,
+            x=constants.PANEL_X_CENTER,
+            y=constants.PANEL_Y_TOP + 110,
+            font_size=24,
+            font_color=constants.TEXT_COLOR
+        )
+
+        # Draw Instructions
+        self.draw_text(
+            message="Select an unclaimed territory.",
+            x=constants.PANEL_X_CENTER,
+            y=constants.PANEL_Y_TOP + 170,
+            font_size=24,
+            font_color=constants.TEXT_COLOR
+        )
+
+        # Draw Selected Territory if one has been selected
+        if hover_territory:
+            self.draw_text(
+                message="Click to Claim:",
+                x=constants.PANEL_X_CENTER,
+                y=constants.PANEL_Y_TOP + 270,
+                font_size=24,
+                font_color=constants.TEXT_COLOR
+            )
+            self.draw_text(
+                message=hover_territory.name,
+                x=constants.PANEL_X_CENTER,
+                y=constants.PANEL_Y_TOP + 310,
+                font_size=24,
+                font_color=constants.TEXT_COLOR
+            )
+        else:
+            self.draw_text(
+                message="No territory selected.",
+                x=constants.PANEL_X_CENTER,
+                y=constants.PANEL_Y_TOP + 295,
+                font_size=24,
+                font_color=constants.TEXT_COLOR
+            )
+
+
+    def draw_deploy(self, player):
+        # Background Rectangle
+
+        # Selected terr. rectangle
+
+        # Title
+
+        # Player Name
+
+        # Troops available
+
+        # Selected territory and number of troops on that territory
+
+        # Troops to deploy text
+
+        # Troops to deploy counter
+
+        pass
+
+    def draw_attack(self, player):
+        # Background Rectangle
+
+        # Attacking from rectangle
+
+        # Defending terr. rectangle
+
+        # Title
+
+        # Player name
+
+        # "Attacking from" text
+
+        # Attacking from territory name
+
+        # Attacking from territory troop count
+
+        # "Defending Territory" Text
+
+        # Defending territory name
+
+        # Defending territory troop count
+
+        # "Attacking troops" text
+
+        # Attacking troops counter
+
+        pass
+
+    def draw_fortify(self, player):
+        # Background rectangle
+
+        # Moving From rectangle
+
+        # Moving to rectangle
+
+        # Title
+
+        # Player Name
+
+        # "Moving from" text
+
+        # Moving from territory name
+
+        # Moving from terr. troop count
+
+        # "Moving to" Text
+
+        # Moving to terr. name
+
+        # Moving from terr. troop count
+
+        # "Troops to Move" text
+
+        # troops to move counter
+
+        pass
+
     def on_enter(self):
         for widget in self.widgets:
             widget.show()

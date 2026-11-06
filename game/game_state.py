@@ -215,7 +215,7 @@ class Game:
 
         for player in self.players:
             player.eliminated = False
-            sel.setup_armies[player.player_id] = army_count
+            self.setup_armies[player.player_id] = army_count
 
         player_card_x = constants.CARD_X_POSITIONS.get(len(self.players), [])
         x: int
