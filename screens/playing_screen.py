@@ -17,8 +17,9 @@ class PlayingScreen(Screen):
         self.game = Game()
 
         # Create the playing overlay
-        self.playing_overlay = PlayingOverlay(screen=manager.screen, on_exit=manager.go_back)
+        self.playing_overlay = PlayingOverlay(screen=manager.screen, on_exit=manager.go_back, game=self.game)
         self.widgets = self.playing_overlay.widgets
+        self.deploy_widgets = self.playing_overlay.deploy_widgets
 
         # TESTING FOR OWNERSHIP OVERLAY
 
@@ -124,7 +125,9 @@ class PlayingScreen(Screen):
         # Draw the phase panel
         match self.game.phase:
             case "setup_claim":
-                self.playing_overlay.draw_claim(self.game.current_player, self.map_screen.hovered_territory)
+                self.playing_overlay.draw_setup(self.game.current_player, "claim", self.map_screen.hovered_territory)
+            case "setup_place":
+                self.playing_overlay.draw_setup(self.game.current_player, "place", self.map_screen.hovered_territory)
             case "deploy":
                 self.playing_overlay.draw_deploy(self.game.current_player)
             case "attack":
