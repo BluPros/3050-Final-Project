@@ -153,7 +153,7 @@ class PlayingOverlay:
         territory = self.game.current_attacking_territory
         if territory is None:
             return
-        if self.attack_troop_counter < territory.reinforcements:
+        if self.attack_troop_counter < territory.troops:
             self.attack_troop_counter += 1
 
     def remove_fortify_troop(self):
@@ -164,7 +164,7 @@ class PlayingOverlay:
         territory = self.game.current_fortifying_territory
         if territory is None:
             return
-        if self.fortify_troop_counter < territory.reinforcements:
+        if self.fortify_troop_counter < territory.troops:
             self.fortify_troop_counter += 1
 
     def configure_player_cards(self, players):
@@ -207,7 +207,7 @@ class PlayingOverlay:
         )
         # Title
         self.draw_text(
-            message="Claim Territory",
+            message=f"{step} Territory",
             x=constants.PANEL_X_CENTER,
             y=constants.PANEL_Y_TOP + 30,
             font_size=40,
@@ -224,7 +224,7 @@ class PlayingOverlay:
         )
 
         # Draw Instructions
-        if step == "claim":
+        if step == "Claim":
             self.draw_text(
                 message="Select an unclaimed territory.",
                 x=constants.PANEL_X_CENTER,
@@ -257,7 +257,7 @@ class PlayingOverlay:
                     font_size=24,
                     font_color=constants.TEXT_COLOR
                 )
-        elif step == "place":
+        elif step == "Reinforce":
             self.draw_text(
                 message="Select a territory you want to reinforce.",
                 x=constants.PANEL_X_CENTER,
@@ -333,7 +333,7 @@ class PlayingOverlay:
         )
         # Actual Troops available
         self.draw_text(
-            message=f"{player.reinforce}",
+            message=f"{player.reinforcements}",
             x=constants.PANEL_X_CENTER,
             y=constants.PANEL_Y_TOP + 110,
             font_size=24,

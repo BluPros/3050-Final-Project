@@ -125,9 +125,9 @@ class PlayingScreen(Screen):
         # Draw the phase panel
         match self.game.phase:
             case "setup_claim":
-                self.playing_overlay.draw_setup(self.game.current_player, "claim", self.map_screen.hovered_territory)
+                self.playing_overlay.draw_setup(self.game.current_player, "Claim", self.map_screen.hovered_territory)
             case "setup_place":
-                self.playing_overlay.draw_setup(self.game.current_player, "place", self.map_screen.hovered_territory)
+                self.playing_overlay.draw_setup(self.game.current_player, "Reinforce", self.map_screen.hovered_territory)
             case "deploy":
                 self.playing_overlay.draw_deploy(self.game.current_player)
             case "attack":
