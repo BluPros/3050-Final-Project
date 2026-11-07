@@ -1,5 +1,5 @@
 # Game Class
-# Should build fresh Territory objects, hold players and curernt_player, and phase
+# Should build fresh Territory objects, hold players and current_player, and phase
 # Can expose functionality:
 # attack(src, dst, n_dice)
 # fortify(...)
@@ -15,11 +15,13 @@ from data.map_data import territories as map_territories
 from game.cards import make_deck, valid_set, trade_value
 from game.dice import RiskDice
 from game.player import Player
+from game.dice import RiskDice, compare_rolls
 
 
 class Game:
     def __init__(self):
-        # This is a copy of all the territories in the game, with their initial state. We will only modify the copy, not the original data.
+        # This is a copy of all the territories in the game, with their 
+        # initial state. We will only modify the copy, not the original data.
         self.territories = deepcopy(map_territories)
 
         self.players = []
@@ -58,10 +60,14 @@ class Game:
         # Remaining armies for each player during setup
         self.setup_armies = {}
 
-    # property allows us to use current_player as a variable, but it will always return the player object for the current player index. This is useful for getting the current player without having to index into the players list manually.
+    # property allows us to use current_player as a variable, but it will always
+    #  return the player object for the current player index. This is useful for 
+    # getting the current player without having to index into the players list 
+    # manually.
     @property
     def current_player(self):
-        # Return None if no players are present, otherwise return the player object for the current player index.
+        # Return None if no players are present, otherwise return the player 
+        # object for the current player index.
         if not self.players:
             return None
 
@@ -199,7 +205,8 @@ class Game:
             if not self.game_started or not self.current_player.eliminated:
                 return
 
-    # Starts the game by setting the current player to the first player, marking the game as started, and setting the initial phase to "deploy".
+    # Starts the game by setting the current player to the first player, 
+    # marking the game as started, and setting the initial phase to "deploy".
     def start_game(self):
         # Start the first player's turn
         self.current_player_index = 0
@@ -210,7 +217,8 @@ class Game:
         # Every normal turn begins with deployment
         self.phase = "deploy"   
 
-    # Starts the setup phase of the game, ensuring the correct number of players and assigning starting armies.
+    # Starts the setup phase of the game, ensuring the correct number of 
+    # players and assigning starting armies.
     def start_setup(self):
         player_count = len(self.players)
 
@@ -239,7 +247,8 @@ class Game:
 
         return True
 
-    # Advances the game to the next phase, handling the transition between deploy, attack, and fortify phases.
+    # Advances the game to the next phase, handling the transition between 
+    # deploy, attack, and fortify phases.
     def next_phase(self):
         # Do not advance if the game has not started or has already ended
         if not self.game_started or self.phase == "game_over":
@@ -257,7 +266,11 @@ class Game:
         elif self.phase == "fortify":
             self.end_turn()
 
-    # Ends the current player's turn, advancing to the next player and resetting the phase to "deploy".
+    # Ends the current player's turn, advancing to the next player and 
+    # resetting the phase to "deploy".
+    # TODO: worried that this might cause issues and allow skipping 
+    # TODO: unintended game phases, potentially worth, hiding the 
+    # TODO: button call until fortify phase
     def end_turn(self):
         if not self.game_started or self.phase == "game_over":
             return
@@ -271,7 +284,8 @@ class Game:
         # New turns begin with deployment
         self.phase = "deploy"
 
-    # Simple getter for a player by their player_id. Returns None if no player with that id exists.
+    # Simple getter for a player by their player_id. Returns None if no player 
+    # with that id exists.
     def get_player(self, player_id):
         for player in self.players:
             if player.player_id == player_id:
@@ -279,7 +293,8 @@ class Game:
 
         return None
 
-    # Assigns a territory to a player, updating the territory's owner_id and troops, and managing the ownership lists of the players involved.
+    # Assigns a territory to a player, updating the territory's owner_id and 
+    # troops, and managing the ownership lists of the players involved.
     def assign_territory(self, territory_name, player_id, troops=1):
 
         # Find the territory object by its name in the territories dictionary
@@ -301,8 +316,10 @@ class Game:
         if new_owner is not None:
             new_owner.add_territory(territory_name)
 
-    # Changes the owner of a territory to a new player, and updates the number of troops on that territory to match the incoming troops. 
-    # This method is useful for handling territory ownership changes during gameplay, such as when a player conquers a territory from another player.
+    # Changes the owner of a territory to a new player, and updates the number 
+    # of troops on that territory to match the incoming troops. 
+    # This method is useful for handling territory ownership changes during gameplay,
+    #  such as when a player conquers a territory from another player.
     def change_territory_owner(self, territory_name, new_player_id, incoming_troops):
 
         self.assign_territory(
@@ -313,6 +330,72 @@ class Game:
 
         # After changing ownership, check if any players have been eliminated or if there is a winner   
         self.check_eliminations_and_winner()
+
+    def verify_attack(self, attacking_territory, defending_territory, num_attacking):
+        # verify battle phase
+        if self.phase != "attack":
+            print("Not currently in battle phase")
+            return False
+ 
+        player = self.current_player
+        attacker = self.territories[attacking_territory]
+        defender = self.territories[defending_territory]
+        
+        # check validity of attack intentions
+        if player is None or attacker is None or defender is None:
+            print("Invalid player or territory")
+            return False
+
+        # check user holds attacking_territory
+        if attacker.owner_id != player.player_id:
+            print("Player does not own attacking territory")
+            return False
+
+        # check user does not hold defending territory
+        if defender.owner_id == player.player_id:
+            print("Player cannot control defending territory")
+            return False
+
+        # check territories are neighbors
+        if not attacker.is_neighbor(defending_territory):
+            print("Territories are not neighboring")
+            return False
+
+
+        # Verify troop_count also must be at most total troops -1
+        if num_attacking > attacker.troops:
+            print("Must leave at least one army behind")
+            return False
+        if num_attacking > 3 or num_attacking < 1: 
+            print("Invalid number of attackers: must be between 1 and 3")
+            return False
+
+        return True
+
+
+    # Single call of attack, implements attack logic, returns true if territory 
+    # is conquered
+    def attack(self, attacking_territory, defending_territory, num_attacking):  
+        if not self.verify_attack(attacking_territory, defending_territory, num_attacking):
+            return None
+
+        attacker = self.territories[attacking_territory]
+        defender = self.territories[defending_territory]
+
+        # create two dice which roll based on num troops
+        attacking_dice = RiskDice("attacker")
+        attack_roll = attacking_dice.roll(attacker.troops, num_attacking)
+        defending_dice = RiskDice("defender")
+        # defaults to max possible defenders
+        defence_roll = defending_dice.roll(defender.troops) 
+
+        # update troop counts
+        dead_attack, dead_defence = compare_rolls(attack_roll, defence_roll)
+        attacker.remove_troops(dead_attack)
+        defender.remove_troops(dead_defence)
+
+        return defender.troops == 0
+
 
     def check_eliminations_and_winner(self):
 
