@@ -63,7 +63,26 @@ class PlayingOverlay:
                    hoverColour=constants.BUTTON_HOVER_COLOR)
         ]
         # Attack Phase widgets
-
+        self.attack_widgets = [
+            # Deploy Troops button
+            Button(self.surface, 830, 390, constants.PANEL_WIDTH - 40, 40,
+                   text="Initiate Attack", onClick=self.end_phase,
+                   # TODO: placeholder onClick. Have to implement deploy button logic
+                   inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
+                   hoverColour=constants.BUTTON_HOVER_COLOR),
+            # Remove troop button
+            Button(self.surface, constants.PANEL_X_CENTER - 70, 340, 40, 40,
+                   text="-", onClick=self.remove_attack_troop,
+                   # TODO: placeholder onClick. Have to implement deploy button logic
+                   inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
+                   hoverColour=constants.BUTTON_HOVER_COLOR),
+            # Add Troop button
+            Button(self.surface, constants.PANEL_X_CENTER + 30, 340, 40, 40,
+                   text="+", onClick=self.add_attack_troop,
+                   # TODO: placeholder onClick. Have to implement deploy button logic
+                   inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
+                   hoverColour=constants.BUTTON_HOVER_COLOR)
+        ]
         # Fortify Phase widgets
 
     # Hides all the widgets we don't want to see
@@ -105,6 +124,17 @@ class PlayingOverlay:
 
         if self.deploy_troop_counter < player.reinforcements:
             self.deploy_troop_counter += 1
+
+    def remove_attack_troop(self):
+        if self.attack_troop_counter > 0:
+            self.attack_troop_counter -= 1
+
+    def add_attack_troop(self):
+        territory = self.game.current_attacking_territory
+        if territory is None:
+            return
+        if self.attack_troop_counter < territory.reinforcements:
+            self.attack_troop_counter += 1
 
     def configure_player_cards(self, players):
         player_x_coordinates = constants.CARD_X_POSITIONS.get(len(players), [])
@@ -329,34 +359,126 @@ class PlayingOverlay:
         )
 
 
-    def draw_attack(self, player):
+    def draw_attack(self, player, attacking_territory=None, defending_territory=None):
         # Background Rectangle
-
-        # Attacking from rectangle
-
+        background_rect = pygame.Rect(
+            constants.PANEL_X_LEFT, constants.PANEL_Y_TOP, constants.PANEL_WIDTH, constants.PANEL_HEIGHT
+        )
+        pygame.draw.rect(
+            self.surface, constants.ATTACK_COLOR, background_rect, border_radius=8
+        )
+        # Attacking From rectangle
+        selected_terr_rect = pygame.Rect(
+            constants.PANEL_X_LEFT + 20, constants.PANEL_Y_TOP + 80, constants.PANEL_WIDTH - 40, 100
+        )
+        pygame.draw.rect(
+            self.surface, constants.WHITE, selected_terr_rect, border_radius=8
+        )
         # Defending terr. rectangle
-
+        selected_terr_rect = pygame.Rect(
+            constants.PANEL_X_LEFT + 20, constants.PANEL_Y_TOP + 185, constants.PANEL_WIDTH - 40, 100
+        )
+        pygame.draw.rect(
+            self.surface, constants.WHITE, selected_terr_rect, border_radius=8
+        )
         # Title
-
+        self.draw_text(
+            message="Attack",
+            x=constants.PANEL_X_CENTER,
+            y=constants.PANEL_Y_TOP + 30,
+            font_size=30,
+            font_color=constants.TEXT_COLOR_LIGHT
+        )
         # Player name
-
+        self.draw_text(
+            message=f"{player.name}'s turn.",
+            x=constants.PANEL_X_CENTER,
+            y=constants.PANEL_Y_TOP + 60,
+            font_size=20,
+            font_color=constants.TEXT_COLOR_LIGHT
+        )
         # "Attacking from" text
-
-        # Attacking from territory name
-
-        # Attacking from territory troop count
-
+        self.draw_text(
+            message="Attacking From:",
+            x=constants.PANEL_X_CENTER,
+            y=constants.PANEL_Y_TOP + 100,
+            font_size=20,
+            font_color=constants.TEXT_COLOR
+        )
+        # Attacking Territory info if selected
+        if attacking_territory:
+            self.draw_text(
+                message=f"{attacking_territory.name}",
+                x=constants.PANEL_X_CENTER,
+                y=constants.PANEL_Y_TOP + 135,
+                font_size=30,
+                font_color=constants.TEXT_COLOR
+            )
+            # Attacking from territory troop count
+            self.draw_text(
+                message=f"Current Troops: {attacking_territory.troops}",
+                x=constants.PANEL_X_CENTER,
+                y=constants.PANEL_Y_TOP + 165,
+                font_size=20,
+                font_color=constants.TEXT_COLOR
+            )
+        else:
+            self.draw_text(
+                message="Please select a territory.",
+                x=constants.PANEL_X_CENTER,
+                y=constants.PANEL_Y_TOP + 135,
+                font_size=20,
+                font_color=constants.TEXT_COLOR
+            )
         # "Defending Territory" Text
-
-        # Defending territory name
-
-        # Defending territory troop count
-
+        self.draw_text(
+            message="Defending Territory",
+            x=constants.PANEL_X_CENTER,
+            y=constants.PANEL_Y_TOP + 200,
+            font_size=20,
+            font_color=constants.TEXT_COLOR
+        )
+        # Defending territory info if selected
+        if defending_territory:
+            self.draw_text(
+                message=f"{defending_territory.name}",
+                x=constants.PANEL_X_CENTER,
+                y=constants.PANEL_Y_TOP + 235,
+                font_size=30,
+                font_color=constants.TEXT_COLOR
+            )
+            # Defending territory troop count
+            self.draw_text(
+                message=f"Current Troops: {defending_territory.troops}",
+                x=constants.PANEL_X_CENTER,
+                y=constants.PANEL_Y_TOP + 265,
+                font_size=20,
+                font_color=constants.TEXT_COLOR
+            )
+        else:
+            self.draw_text(
+                message="Please select a territory.",
+                x=constants.PANEL_X_CENTER,
+                y=constants.PANEL_Y_TOP + 235,
+                font_size=20,
+                font_color=constants.TEXT_COLOR
+            )
         # "Attacking troops" text
-
+        self.draw_text(
+            message="Attacking Troops",
+            x=constants.PANEL_X_CENTER,
+            y=constants.PANEL_Y_TOP + 310,
+            font_size=20,
+            font_color=constants.TEXT_COLOR_LIGHT
+        )
         # Attacking troops counter
-
-        pass
+        self.draw_text(
+            message=f"{self.attack_troop_counter}",
+            x=constants.PANEL_X_CENTER,
+            y=constants.PANEL_Y_TOP + 345,
+            font_size=20,
+            font_color=constants.TEXT_COLOR_LIGHT
+        )
 
     def draw_fortify(self, player):
         # Background rectangle
