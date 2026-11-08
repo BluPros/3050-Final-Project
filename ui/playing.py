@@ -28,6 +28,22 @@ class PlayingOverlay:
             on_close=self.show_widgets
         )
 
+        # maintains clicked order for battle, move, fortify, etc.
+        self.selected_src = None
+        self.selected_dst = None
+        # true after conquest, until confirms move-in
+        self.moving_in = False
+        # if owners are changing
+        self.map_limbo = False
+
+    def clear_selection(self):
+        self.selected_src = None
+        self.selected_dst = None
+        self.moving_in = False
+        self.deploy_troop_counter = 0
+        self.attack_troop_counter = 0
+        self.fortify_troop_counter = 0
+
 
     def create_widgets(self):
         # Regular Buttons that show all the time.
@@ -39,7 +55,7 @@ class PlayingOverlay:
                    hoverColour=constants.BUTTON_HOVER_COLOR),
             # Help Menu Button
             Button(self.surface, 10, 10, 140, 40,
-                   text="Help", onClick=self.end_phase,
+                   text="Help", onClick=lambda: print("printed help from playing screen"),
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR)
         ]
