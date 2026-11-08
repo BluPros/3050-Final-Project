@@ -8,9 +8,12 @@
 
 #############################################
 from copy import deepcopy
+import random
 
 import constants
 from data.map_data import territories as map_territories
+from game.cards import make_deck, valid_set, trade_value
+from game.dice import RiskDice
 from game.player import Player
 
 
@@ -24,6 +27,18 @@ class Game:
 
         # Track the current stage of the game
         self.phase = "setup_claim"
+
+        # Card management and state
+        self.card_deck = make_deck(self.territories)
+        random.shuffle(self.card_deck)
+        self.card_discard = []
+        self.card_trades = 0
+        self.card_phase = "setup"
+
+        self.card_turn_player = None
+        self.captured_this_turn = False
+        self.card_drawn_this_turn = False
+        self.territory_bonus_used = False
 
         # True once the game has started
         self.game_started = False
@@ -330,3 +345,289 @@ class Game:
             self.phase = "game_over"
 
             print(f"{winner.name} has won the game!")
+
+    # Returns the requested player, or the current player if no ID is provided.
+    def card_player(self, player_id=None):
+        if player_id is None:
+            player = self.current_player
+        else:
+            player = self.get_player(player_id)
+
+        if player is None:
+            raise ValueError("Unknown player or no current player.")
+
+        return player
+
+
+    # Makes sure the card turn belongs to the current player.
+    def require_card_turn(self):
+        player = self.card_player()
+
+        if player.player_id != self.card_turn_player:
+            raise ValueError(
+                "Call begin_card_turn for the current player first."
+            )
+
+        return player
+
+
+    # Starts the current player's card turn and resets turn-specific state.
+    def begin_card_turn(self):
+        player = self.card_player()
+
+        self.card_turn_player = player.player_id
+        self.card_phase = "deploy"
+
+        self.captured_this_turn = False
+        self.card_drawn_this_turn = False
+        self.territory_bonus_used = False
+
+
+    # Updates the card phase and prevents leaving deployment before required trades.
+    def set_card_phase(self, phase):
+        self.require_card_turn()
+
+        if phase not in ("deploy", "attack", "fortify", "end"):
+            raise ValueError("Unknown card phase.")
+
+        if (
+            self.card_phase == "deploy"
+            and phase != "deploy"
+            and self.must_redeem_cards()
+        ):
+            raise ValueError("Trade cards before leaving deployment.")
+
+        self.card_phase = phase
+
+
+    # Records a successful capture so the current player can earn a card.
+    def mark_territory_captured(self):
+        self.require_card_turn()
+
+        if self.card_phase != "attack":
+            raise ValueError("Captures must occur in the attack phase.")
+
+        self.captured_this_turn = True
+
+
+    # Awards one card at the end of a turn if the player captured a territory.
+    def draw_card(self):
+        player = self.require_card_turn()
+
+        if self.card_phase != "end":
+            raise ValueError(
+                "Reward cards are drawn at the end of a turn."
+            )
+
+        # Players can earn only one reward card per turn.
+        if not self.captured_this_turn or self.card_drawn_this_turn:
+            return None
+
+        # Reuse discarded cards if the draw deck is empty.
+        if not self.card_deck and self.card_discard:
+            self.card_deck = self.card_discard[:]
+            self.card_discard.clear()
+
+            random.shuffle(self.card_deck)
+
+        if not self.card_deck:
+            return None
+
+        card = self.card_deck.pop()
+
+        player.cards.append(card)
+        self.card_drawn_this_turn = True
+
+        return card
+
+
+    # Returns copies of a player's card information for the UI to display.
+    def show_card(self, player_id=None):
+        player = self.card_player(player_id)
+
+        return [
+            card.to_dict()
+            for card in player.cards
+        ]
+
+
+    # Checks whether the current player has enough cards to require a trade.
+    def must_redeem_cards(self):
+        player = self.card_player()
+
+        return len(player.cards) >= 5
+
+
+    # Trades three valid cards for reinforcements and an eligible territory bonus.
+    def redeem_card(self, card_ids, bonus_territory=None):
+        player = self.require_card_turn()
+
+        if self.card_phase != "deploy":
+            raise ValueError("Trade cards during deployment.")
+
+        ids = list(card_ids)
+
+        # A trade must contain exactly three different cards.
+        if len(ids) != 3 or len(set(ids)) != 3:
+            raise ValueError("Select three distinct card IDs.")
+
+        hand = {
+            card.card_id: card
+            for card in player.cards
+        }
+
+        # Make sure all selected cards belong to the current player.
+        if any(card_id not in hand for card_id in ids):
+            raise ValueError("Selected card is not in your hand.")
+
+        selected = [
+            hand[card_id]
+            for card_id in ids
+        ]
+
+        if not valid_set(selected):
+            raise ValueError("Not a valid Risk card set.")
+
+        # Find traded card territories that the current player owns.
+        eligible_territories = [
+            card.territory
+            for card in selected
+            if card.territory in self.territories
+            and (
+                self.territories[card.territory].owner_id
+                == player.player_id
+            )
+        ]
+
+        # A requested bonus must be available and match an eligible territory.
+        if bonus_territory is not None:
+            if (
+                self.territory_bonus_used
+                or bonus_territory not in eligible_territories
+            ):
+                raise ValueError(
+                    "Territory bonus unavailable for that territory."
+                )
+
+        # Without a requested territory, use the first eligible territory.
+        selected_bonus_territory = None
+
+        if not self.territory_bonus_used:
+            if bonus_territory is not None:
+                selected_bonus_territory = bonus_territory
+            elif eligible_territories:
+                selected_bonus_territory = eligible_territories[0]
+
+        armies = trade_value(self.card_trades)
+
+        # Remove the traded cards from the player's hand.
+        player.cards[:] = [
+            card
+            for card in player.cards
+            if card.card_id not in ids
+        ]
+
+        self.card_discard.extend(selected)
+        self.card_trades += 1
+
+        player.add_reinforcements(armies)
+
+        # Apply the territory bonus directly, at most once per turn.
+        bonus_armies = 0
+
+        if selected_bonus_territory is not None:
+            self.territories[selected_bonus_territory].add_troops(2)
+
+            self.territory_bonus_used = True
+            bonus_armies = 2
+
+        return {
+            "reinforcements": armies,
+            "bonus_territory": selected_bonus_territory,
+            "bonus_armies": bonus_armies
+        }
+
+
+    # Rolls legal attacker or defender dice without changing the game state.
+    def roll_dice(self, role, armies, num_dice=None):
+        dice = RiskDice(role)
+
+        return dice.roll(armies, num_dice)
+
+
+    # Transfers an eliminated opponent's cards to the current player.
+    def transfer_cards(self, eliminated_player_id):
+        winner = self.require_card_turn()
+        loser = self.card_player(eliminated_player_id)
+
+        # The current player cannot take their own cards.
+        if winner is loser:
+            raise ValueError("Player is not an eliminated opponent.")
+
+        # An opponent must have no territories before their cards are transferred.
+        has_territories = any(
+            territory.owner_id == loser.player_id
+            for territory in self.territories.values()
+        )
+
+        if has_territories:
+            raise ValueError("Player is not an eliminated opponent.")
+
+        card_count = len(loser.cards)
+
+        winner.cards.extend(loser.cards)
+        loser.cards.clear()
+
+        return card_count
+
+
+    # Returns a full state snapshot, including private hands and deck order.
+    # This exports data only; it does not save, load, or synchronize a game.
+    def state_snapshot(self):
+        players = [
+            {
+                "player_id": player.player_id,
+                "name": player.name,
+                "color": list(player.color),
+                "territories": list(player.territories),
+                "reinforcements": player.reinforcements,
+                "cards": [
+                    card.to_dict()
+                    for card in player.cards
+                ]
+            }
+            for player in self.players
+        ]
+
+        territories = {
+            name: {
+                "owner_id": territory.owner_id,
+                "troops": territory.troops
+            }
+            for name, territory in self.territories.items()
+        }
+
+        cards = {
+            "deck": [
+                card.to_dict()
+                for card in self.card_deck
+            ],
+            "discard": [
+                card.to_dict()
+                for card in self.card_discard
+            ],
+            "trades": self.card_trades,
+            "phase": self.card_phase,
+            "turn_player": self.card_turn_player,
+            "captured": self.captured_this_turn,
+            "drawn": self.card_drawn_this_turn,
+            "territory_bonus_used": self.territory_bonus_used
+        }
+
+        return {
+            "schema_version": 1,
+            "current_player_index": self.current_player_index,
+            "players": players,
+            "territories": territories,
+            "cards": cards
+        }
