@@ -1,7 +1,7 @@
 import constants
 import pygame
 import sys
-from screens import menu, playing_screen, instructions, new_game_screen
+from screens import menu, playing_screen, instructions, new_game_screen, game_over_screen
 import pygame_widgets
 
 
@@ -19,6 +19,7 @@ class GameStateManager:
             "playing": playing_screen.PlayingScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
             "instructions": instructions.InstructionScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
             "new_game": new_game_screen.NewGameScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
+            "game_over": game_over_screen.GameOverScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
             # "help": HelpScreen(self)
         }
         # On Init Default Screen is "menu"
@@ -26,13 +27,38 @@ class GameStateManager:
         self.previous_screen = None
         self.current_screen.on_enter()
 
+    # Starts a game with the given player settings
+    # player_settings: a dictionary containing the configuration for the players in the game
+    def start_configured_game(self, player_settings):
+        playing_screen = self.screens["playing"]
+
+        playing_screen.configure_game(player_settings)
+
+        self.change_screen("playing")
+
+    # Resumes an existing game if one is in progress, otherwise goes to the new game screen
+    def resume_or_new_game(self):
+        playing_screen = self.screens["playing"]
+
+        # Continue an existing unfinished game
+        if (
+            playing_screen.game.players
+            and playing_screen.game.phase != "game_over"
+        ):
+            self.change_screen("playing")
+        else:
+            self.change_screen("new_game")
+
     def change_screen(self, name):
         # Update which screen is active (widgets)
         self.current_screen.on_exit()
+
         # Update prev. screen
         self.previous_screen = self.current_screen
+
         # Change screen for manager
         self.current_screen = self.screens[name]
+
         # Show new current widgets
         self.current_screen.on_enter()
 

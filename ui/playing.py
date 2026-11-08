@@ -5,10 +5,12 @@ from pygame_widgets.button import Button
 import constants
 
 class PlayingOverlay:
-    def __init__(self, screen, on_exit, game):
+    def __init__(self, screen, on_exit, game, on_end_phase=None, on_help=None):
         self.surface = screen
         self.on_exit = on_exit
         self.game = game
+        self.on_end_phase = on_end_phase
+        self.on_help = on_help
         self.players = []
         self.widgets = []
         self.deploy_widgets = []
@@ -29,6 +31,19 @@ class PlayingOverlay:
         )
 
 
+    def clear_selection(self):
+        # Clear selected territories
+        self.selected_src = None
+        self.selected_dst = None
+
+        # Reset troop movement state
+        self.moving_in = False
+
+        # Reset troop counters
+        self.deploy_troop_counter = 0
+        self.attack_troop_counter = 0
+        self.fortify_troop_counter = 0
+        
     def create_widgets(self):
         # Regular Buttons that show all the time.
         self.widgets =[
@@ -37,13 +52,16 @@ class PlayingOverlay:
                    text="End Phase", onClick=self.end_phase,
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR),
+                   
             # Help Menu Button
             Button(self.surface, 10, 10, 140, 40,
-                   text="Help", onClick=self.end_phase,
+                   text="Help", onClick=self.show_help,
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR),
+
+            # Cards Menu Button
             Button(self.surface, 810, 510, 180, 147,
-                   text="Cards", onClick=self.end_phase, # Have to add real onClick Method
+                   text="Cards", onClick=lambda: print("Cards button not implemented"), # Have to add real onClick Method
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR)
         ]
@@ -641,4 +659,9 @@ class PlayingOverlay:
             widget.show()
 
     def end_phase(self):
-        pass
+        if self.on_end_phase is not None:
+            self.on_end_phase()
+
+    def show_help(self):
+        if self.on_help is not None:
+            self.on_help()

@@ -5,7 +5,7 @@ from screens.base_screen import Screen
 class NewGameScreen(Screen):
     def __init__(self, manager, window_width, window_height):
         super().__init__(manager)
-        self.new_game_menu = NewGameMenu(screen=manager.screen, on_exit=manager.go_back)
+        self.new_game_menu = NewGameMenu(screen=manager.screen, on_exit=manager.go_back, on_start=manager.start_configured_game)
 
         self.widgets = self.new_game_menu.widgets
 
