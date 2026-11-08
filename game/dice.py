@@ -45,3 +45,17 @@ class RiskDice:
             [random.randint(1, 6) for _ in range(num_dice)],
             reverse=True,
         )
+
+# compares two ordered lists of RiskDice.roll() sorted high to
+# low, returns dead_attackers, dead_defenders
+def compare_rolls(attacker, defender):
+    dead_attackers = 0
+    dead_defenders = 0
+    # zip will stop at shortest list, so auto removes lowest roll
+    for a_roll, d_roll in zip(attacker, defender):
+        if a_roll > d_roll:
+            dead_defenders += 1
+        else:
+            dead_attackers += 1
+
+    return dead_attackers, dead_defenders
