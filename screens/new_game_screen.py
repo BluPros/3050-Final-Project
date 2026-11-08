@@ -28,3 +28,7 @@ class NewGameScreen(Screen):
 
         for player in self.new_game_menu.players:
             player.name_input.show()
+    
+    def on_exit(self):
+        super().on_exit()
+        self.new_game_menu.hide_widgets()
