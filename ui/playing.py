@@ -5,13 +5,16 @@ from pygame_widgets.button import Button
 import constants
 
 class PlayingOverlay:
-    def __init__(self, screen, on_exit, game, on_end_phase=None, on_help=None, on_deploy=None):
+    def __init__(self, screen, on_exit, game, on_end_phase=None, on_help=None, on_deploy=None, on_fortify=None,
+                 on_attack=None):
         self.surface = screen
         self.on_exit = on_exit
         self.game = game
         self.on_end_phase = on_end_phase
         self.on_help = on_help
         self.on_deploy = on_deploy
+        self.on_fortify = on_fortify
+        self.on_attack = on_attack
         self.players = []
         self.widgets = []
         self.deploy_widgets = []
@@ -99,7 +102,7 @@ class PlayingOverlay:
         self.attack_widgets = [
             # Deploy Troops button
             Button(self.surface, 830, 390, constants.PANEL_WIDTH - 40, 40,
-                   text="Initiate Attack", onClick=self.end_phase,
+                   text="Initiate Attack", onClick=self.initiate_attack,
                    # TODO: placeholder onClick. Have to implement deploy button logic
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR),
@@ -120,7 +123,7 @@ class PlayingOverlay:
         self.fortify_widgets = [
             # Deploy Troops button
             Button(self.surface, 830, 390, constants.PANEL_WIDTH - 40, 40,
-                   text="Move Troops", onClick=self.end_phase,
+                   text="Move Troops", onClick=self.fortify_troops,
                    # TODO: placeholder onClick. Have to implement deploy button logic
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR),
@@ -234,16 +237,26 @@ class PlayingOverlay:
         if self.attack_troop_counter < limit:
             self.attack_troop_counter += 1
 
+    def initiate_attack(self):
+        if self.on_attack is not None:
+            self.on_attack()
+
     def remove_fortify_troop(self):
         if self.fortify_troop_counter > 0:
             self.fortify_troop_counter -= 1
 
     def add_fortify_troop(self):
-        territory = self.game.current_fortifying_territory
+        territory = self.selected_src
+
         if territory is None:
             return
-        if self.fortify_troop_counter < territory.troops:
+
+        if self.fortify_troop_counter < territory.troops - 1:
             self.fortify_troop_counter += 1
+
+    def fortify_troops(self):
+        if self.on_fortify is not None:
+            self.on_fortify()
 
     def configure_player_cards(self, players):
         player_x_coordinates = constants.CARD_X_POSITIONS.get(len(players), [])
