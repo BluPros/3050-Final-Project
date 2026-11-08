@@ -5,12 +5,13 @@ from pygame_widgets.button import Button
 import constants
 
 class PlayingOverlay:
-    def __init__(self, screen, on_exit, game, on_end_phase=None, on_help=None):
+    def __init__(self, screen, on_exit, game, on_end_phase=None, on_help=None, on_deploy=None):
         self.surface = screen
         self.on_exit = on_exit
         self.game = game
         self.on_end_phase = on_end_phase
         self.on_help = on_help
+        self.on_deploy = on_deploy
         self.players = []
         self.widgets = []
         self.deploy_widgets = []
@@ -80,7 +81,7 @@ class PlayingOverlay:
         self.deploy_widgets =[
             # Deploy Troops button
             Button(self.surface, 830, 386, constants.PANEL_WIDTH - 40, 40,
-                   text="Deploy Troops", onClick=self.end_phase,# TODO: placeholder onClick. Have to implement deploy button logic
+                   text="Deploy Troops", onClick=self.deploy_troops,# TODO: placeholder onClick. Have to implement deploy button logic
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR),
             # Remove troop button
@@ -205,6 +206,10 @@ class PlayingOverlay:
 
         if self.deploy_troop_counter < player.reinforcements:
             self.deploy_troop_counter += 1
+
+    def deploy_troops(self):
+        if self.on_deploy is not None:
+            self.on_deploy()
 
     def remove_attack_troop(self):
         if self.moving_in:
@@ -698,7 +703,7 @@ class PlayingOverlay:
         )
         # Troops to move counter
         self.draw_text(
-            message=f"{self.attack_troop_counter}",
+            message=f"{self.fortify_troop_counter}",
             x=constants.PANEL_X_CENTER,
             y=constants.PANEL_Y_TOP + 345,
             font_size=20,

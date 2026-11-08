@@ -22,7 +22,8 @@ class PlayingScreen(Screen):
             on_exit=manager.go_back,
             game=self.game,
             on_end_phase=self.advance_phase,
-            on_help=lambda: manager.change_screen("instructions"))
+            on_help=lambda: manager.change_screen("instructions"),
+            on_deploy=self.deploy_troops)
         
         self.widgets = self.playing_overlay.widgets
         self.deploy_widgets = self.playing_overlay.deploy_widgets
@@ -308,3 +309,17 @@ class PlayingScreen(Screen):
             + self.playing_overlay.attack_widgets
             + self.playing_overlay.fortify_widgets
         )
+
+    # Kind of awkward having this here, but since the playing screen has a game overlay
+    # and a playing overlay, we need functions to communicate between the two.
+    def deploy_troops(self):
+        territory = self.playing_overlay.selected_src
+        count = self.playing_overlay.deploy_troop_counter
+
+        if territory is None or count <= 0:
+            return
+
+        successful_deployment = self.game.deploy(territory.name, count)
+
+        if successful_deployment:
+            self.playing_overlay.clear_selection()
