@@ -12,10 +12,11 @@ import random
 
 import constants
 from data.map_data import territories as map_territories
+from data.map_data import continents
 from game.cards import make_deck, valid_set, trade_value
-from game.dice import RiskDice
 from game.player import Player
 from game.dice import RiskDice, compare_rolls
+from game.map_utils import connected
 
 
 class Game:
@@ -30,7 +31,7 @@ class Game:
         # Track the current stage of the game
         self.phase = "setup_claim"
 
-        # Card management and state
+        # Card management
         self.card_deck = make_deck(self.territories)
         random.shuffle(self.card_deck)
         self.card_discard = []
@@ -47,6 +48,9 @@ class Game:
         # ID of the winning player
         self.winner_id = None
 
+        # territories in limbo
+        self.pending_conquest = None
+
         # Dictionary for starting army count based on player count
         self.starting_armies = {
             2: 40,
@@ -58,6 +62,12 @@ class Game:
 
         # Remaining armies for each player during setup
         self.setup_armies = {}
+
+    # Too many of the same annoying pattern, this is one line instead of 2,
+    # idk if this will actually save me time but I am annoyed so idc
+    def reject(self, message):
+        print(message)
+        return False
 
     # property allows us to use current_player as a variable, but it will always
     #  return the player object for the current player index. This is useful for 
@@ -251,11 +261,14 @@ class Game:
     def next_phase(self):
         # Do not advance if the game has not started or has already ended
         if not self.game_started or self.phase == "game_over":
-            return
+            return False
+
+        if self.pending_conquest is not None:
+            return False
 
         # Redeem cards → Calculate reinforcements → Place troops
         if self.phase == "deploy":
-            if self.must_redeem_cards():
+            if self.must_redeem_cards() or self.current_player.reinforcements > 0:
                 return False
             self.phase = "attack"
 
@@ -266,6 +279,8 @@ class Game:
         # Move troops → End turn → Draw earned card
         elif self.phase == "fortify":
             self.end_turn()
+        
+        return True
 
     def start_turn(self):
         self.phase = "deploy"
@@ -275,8 +290,10 @@ class Game:
         self.territory_bonus_used = False
         self.fortified_this_turn = False
 
-        # TODO: When reinforcements are calculated, fix and uncomment this line
-        #self.current_player.add_reinforcements(self.c)
+        self.pending_conquest = None
+
+        player = self.current_player
+        player.add_reinforcements(self.allocate_troops(player.player_id))
 
     # Ends the current player's turn, advancing to the next player and 
     # resetting the phase to "deploy".
@@ -289,6 +306,9 @@ class Game:
 
         if not self.players:
             return
+
+        # draw card for player
+        self.draw_card()
 
         # Advance to the next player's turn
         self.next_player()
@@ -343,22 +363,94 @@ class Game:
         # After changing ownership, check if any players have been eliminated or if there is a winner   
         self.check_eliminations_and_winner()
 
-    def allocate_troops(player_id):
-        player = get_player(player_id)
+
+    def allocate_troops(self, player_id):
+        player = self.get_player(player_id)
         num_territories = len(player.territories)
-        troops = int(num_territories / 3)
+        # how the game calculate number of troops awarded for territory num
+        troops = num_territories // 3
+        if troops < 3:
+            troops = 3
 
-        bonus = continent_bonus(player_id)
+        bonus = self.continent_bonus(player_id)
+        troops += bonus
 
-    def continent_bonus(player_id):
-        return 0
-        #for country in player.territories
+        return troops
+
+
+    def continent_bonus(self, player_id):
+        bonus = 0
+
+        for continent in continents.values():
+            owns = True
+            for name in continent.territories:
+                if self.territories[name].owner_id != player_id:
+                    owns = False
+                    break
+
+            if owns:
+                bonus += continent.bonus
+
+        return bonus
+
+    # Perform necessary checks, if all pass update territory
+    # with count troops added
+    def deploy(self, territory_name, count):
+        if self.phase != "deploy":
+            return self.reject("not currently in deployment phase")
+        
+        player = self.current_player
+
+        if not player.owns_territory(territory_name):
+            return self.reject("current player does not own this territory")
+
+        if count < 1:
+            return self.reject("must deploy at least one troop")
+
+        if not player.use_reinforcements(count):
+            return self.reject("not enough reinforcements")
+
+        self.territories[territory_name].add_troops(count)
+        return True
+        
+
+    # basically a BFS
+    def fortify(self, src_territory, dest_territory, count):
+        if self.phase != "fortify":
+            return self.reject("not currently in fortify phase")
+
+        if self.fortified_this_turn:
+            return self.reject("cannot fortify more than once")
+
+        if src_territory == dest_territory:
+            return self.reject("must be different territories")
+
+        player = self.current_player
+        source = self.territories[src_territory]
+        destination = self.territories[dest_territory]
+
+        if not (player.owns_territory(dest_territory) and player.owns_territory(src_territory)):
+            return self.reject("player does not own both territories")
+
+        # TODO: Should be handled somewhere else probabaly
+        if source.troops <= count:
+            return self.reject("not enough troops in the source territory to pull from")
+
+        if not connected(self.territories, src_territory, dest_territory, player.player_id):
+            return self.reject("territories not connected")
+        
+        source.remove_troops(count)
+        destination.add_troops(count)
+        self.fortified_this_turn = True
+        return True
 
     def verify_attack(self, attacking_territory, defending_territory, num_attacking):
         # verify battle phase
         if self.phase != "attack":
-            print("Not currently in battle phase")
-            return False
+            return self.reject("Not currently in battle phase")
+
+        if self.pending_conquest is not None:
+            return self.reject("must move troops into conquered territory")
  
         player = self.current_player
         attacker = self.territories[attacking_territory]
@@ -366,32 +458,26 @@ class Game:
         
         # check validity of attack intentions
         if player is None or attacker is None or defender is None:
-            print("Invalid player or territory")
-            return False
+            return self.reject("Invalid player or territory")
 
         # check user holds attacking_territory
         if attacker.owner_id != player.player_id:
-            print("Player does not own attacking territory")
-            return False
+            return self.reject("Player does not own attacking territory")
 
         # check user does not hold defending territory
         if defender.owner_id == player.player_id:
-            print("Player cannot control defending territory")
-            return False
+            return self.reject("Player cannot control defending territory")
 
         # check territories are neighbors
         if not attacker.is_neighbor(defending_territory):
-            print("Territories are not neighboring")
-            return False
+            return self.reject("Territories are not neighboring")
 
 
         # Verify troop_count also must be at most total troops -1
-        if num_attacking > attacker.troops:
-            print("Must leave at least one army behind")
-            return False
+        if num_attacking >= attacker.troops:
+            return self.reject("Must leave at least one army behind")
         if num_attacking > 3 or num_attacking < 1: 
-            print("Invalid number of attackers: must be between 1 and 3")
-            return False
+            return self.reject("Invalid number of attackers: must be between 1 and 3")
 
         return True
 
@@ -417,9 +503,45 @@ class Game:
         attacker.remove_troops(dead_attack)
         defender.remove_troops(dead_defence)
 
-        return defender.troops == 0
+        conquered = defender.troops == 0
 
+        if conquered:
+            self.pending_conquest = {
+                "source": attacking_territory,
+                "destination": defending_territory,
+                "min_move": num_attacking
+            }
 
+        return conquered
+
+    
+    def move_in(self, count):
+        if self.pending_conquest is None:
+            return self.reject("no territory in limbo to move into")
+
+        src_name = self.pending_conquest["source"]
+        dst_name = self.pending_conquest["destination"]
+        src = self.territories[src_name]
+        dst = self.territories[dst_name]
+
+        if count < self.pending_conquest["min_move"] or count > src.troops - 1:
+            return self.reject("invalid number of troops to move in")
+
+        player = self.current_player
+
+        loser_id = dst.owner_id
+        self.mark_territory_captured()
+        src.remove_troops(count)
+        self.change_territory_owner(dst_name, player.player_id, count)
+
+        self.pending_conquest = None
+
+        loser = self.get_player(loser_id)
+        if loser is not None and loser.eliminated:
+            self.transfer_cards(loser_id)
+
+        return True
+    
     def check_eliminations_and_winner(self):
 
         # Make sure no one is elimiated before or after the start of the traditional game loop
@@ -465,39 +587,9 @@ class Game:
         return player
 
 
-    # TODO: REMOVE - replaced by start_turn()
-    # Starts the current player's card turn and resets turn-specific state.
-    def begin_card_turn(self):
-        player = self.card_player()
-
-        self.card_turn_player = player.player_id
-        self.card_phase = "deploy"
-
-        self.captured_this_turn = False
-        self.card_drawn_this_turn = False
-        self.territory_bonus_used = False
-
-
-    # Updates the card phase and prevents leaving deployment before required trades.
-    def set_card_phase(self, phase):
-        self.require_card_turn()
-
-        if phase not in ("deploy", "attack", "fortify", "end"):
-            raise ValueError("Unknown card phase.")
-
-        if (
-            self.card_phase == "deploy"
-            and phase != "deploy"
-            and self.must_redeem_cards()
-        ):
-            raise ValueError("Trade cards before leaving deployment.")
-
-        self.card_phase = phase
-
-
     # Records a successful capture so the current player can earn a card.
     def mark_territory_captured(self):
-        self.require_card_turn()
+        self.card_player()
 
         if self.phase != "attack":
             raise ValueError("Captures must occur in the attack phase.")
@@ -507,7 +599,7 @@ class Game:
 
     # Awards one card at the end of a turn if the player captured a territory.
     def draw_card(self):
-        player = self.require_card_turn()
+        player = self.card_player()
 
         # Players can earn only one reward card per turn.
         if not self.captured_this_turn or self.card_drawn_this_turn:
@@ -550,7 +642,7 @@ class Game:
 
     # Trades three valid cards for reinforcements and an eligible territory bonus.
     def redeem_card(self, card_ids, bonus_territory=None):
-        player = self.require_card_turn()
+        player = self.card_player()
 
         if self.phase != "deploy":
             raise ValueError("Trade cards during deployment.")
@@ -636,13 +728,6 @@ class Game:
             "bonus_territory": selected_bonus_territory,
             "bonus_armies": bonus_armies
         }
-
-
-    # Rolls legal attacker or defender dice without changing the game state.
-    def roll_dice(self, role, armies, num_dice=None):
-        dice = RiskDice(role)
-
-        return dice.roll(armies, num_dice)
 
 
     # Transfers an eliminated opponent's cards to the current player.
