@@ -148,6 +148,35 @@ class PlayingOverlay:
             case "fortify":
                 self.show_widgets(self.fortify_widgets)
 
+    def select_territory(self, territory):
+        player = self.game.current_player
+        owned = territory.owner_id == player.player_id
+
+        if self.game.phase == "deploy":
+            if owned:
+                self.selected_src = territory
+
+        elif self.game.phase == "attack":
+            if self.moving_in:
+                return
+            if owned and territory.troops >= 2:
+                self.selected_src = territory
+                self.selected_dst = None
+                self.attack_troop_counter = min(3, territory.troops - 1)
+            elif not owned and self.selected_src and self.selected_src.is_neighbor(territory.name):
+                self.selected_dst = territory
+        
+        #TODO: not checking possible connection here but lowk fine, cause it happens either way
+        # probably will need to print my error messages n' stuff somehow
+        elif self.game.phase == "fortify":
+            if not owned:
+                return
+            if territory is self.selected_src:
+                self.clear_selection()
+            elif self.selected_src is None:
+                self.selected_src = territory
+            else: self.selected_dst = territory
+
     def remove_deployment_troop(self):
         if self.deploy_troop_counter > 0:
             self.deploy_troop_counter -= 1
@@ -162,14 +191,26 @@ class PlayingOverlay:
             self.deploy_troop_counter += 1
 
     def remove_attack_troop(self):
-        if self.attack_troop_counter > 0:
+        if self.moving_in:
+            minimum = self.game.pending_conquest["min_move"]
+        else:
+            minimum = 1
+
+        if self.attack_troop_counter > minimum:
             self.attack_troop_counter -= 1
 
+
     def add_attack_troop(self):
-        territory = self.game.current_attacking_territory
-        if territory is None:
+        src = self.selected_src
+        if src is None:
             return
-        if self.attack_troop_counter < territory.troops:
+
+        if self.moving_in:
+            limit = src.troops -1
+        else:
+            limit = min(3, src.troops -1)
+
+        if self.attack_troop_counter < limit:
             self.attack_troop_counter += 1
 
     def remove_fortify_troop(self):
