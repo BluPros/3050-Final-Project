@@ -73,19 +73,14 @@ class Player:
             14
         )
 
-        text_surface = font.render(
-            f"{self.name}\n"
-            f"Troop Count: {self.reinforcements}\n"
-            f"Terr. Count: {len(self.territories)}",
-            True,
-            constants.TEXT_COLOR
-        )
+        lines = [
+            self.name,
+            f"Troop Count: {self.reinforcements}",
+            f"Terr. Count: {len(self.territories)}"
+        ]
 
-        # Position the text inside the player information panel.
-        text_x = self.x_center
-        text_y = self.y_center - constants.CARD_HEIGHT // 4
-
-        text_rect = text_surface.get_rect()
-        text_rect.center = (text_x, text_y)
-
-        surface.blit(text_surface, text_rect)
+        y = self.y_center - constants.CARD_HEIGHT // 2 + 15
+        for line in lines:
+            surf = font.render(line, True, constants.TEXT_COLOR)
+            surface.blit(surf, surf.get_rect(center=(self.x_center, y)))
+            y += font.get_linesize()
