@@ -35,12 +35,11 @@ class Game:
         random.shuffle(self.card_deck)
         self.card_discard = []
         self.card_trades = 0
-        self.card_phase = "setup"
-
-        self.card_turn_player = None
+        
         self.captured_this_turn = False
         self.card_drawn_this_turn = False
         self.territory_bonus_used = False
+        self.fortified_this_turn = False
 
         # True once the game has started
         self.game_started = False
@@ -214,8 +213,8 @@ class Game:
         # Setup is complete
         self.game_started = True
 
-        # Every normal turn begins with deployment
-        self.phase = "deploy"   
+        # Start new turn
+        self.start_turn()
 
     # Starts the setup phase of the game, ensuring the correct number of 
     # players and assigning starting armies.
@@ -256,6 +255,8 @@ class Game:
 
         # Redeem cards → Calculate reinforcements → Place troops
         if self.phase == "deploy":
+            if self.must_redeem_cards():
+                return False
             self.phase = "attack"
 
         # Battle → Capture territories
@@ -265,6 +266,17 @@ class Game:
         # Move troops → End turn → Draw earned card
         elif self.phase == "fortify":
             self.end_turn()
+
+    def start_turn(self):
+        self.phase = "deploy"
+
+        self.captured_this_turn = False
+        self.card_drawn_this_turn = False
+        self.territory_bonus_used = False
+        self.fortified_this_turn = False
+
+        # TODO: When reinforcements are calculated, fix and uncomment this line
+        #self.current_player.add_reinforcements(self.c)
 
     # Ends the current player's turn, advancing to the next player and 
     # resetting the phase to "deploy".
@@ -281,8 +293,8 @@ class Game:
         # Advance to the next player's turn
         self.next_player()
 
-        # New turns begin with deployment
-        self.phase = "deploy"
+        # Start new turn 
+        self.start_turn()
 
     # Simple getter for a player by their player_id. Returns None if no player 
     # with that id exists.
@@ -330,6 +342,17 @@ class Game:
 
         # After changing ownership, check if any players have been eliminated or if there is a winner   
         self.check_eliminations_and_winner()
+
+    def allocate_troops(player_id):
+        player = get_player(player_id)
+        num_territories = len(player.territories)
+        troops = int(num_territories / 3)
+
+        bonus = continent_bonus(player_id)
+
+    def continent_bonus(player_id):
+        return 0
+        #for country in player.territories
 
     def verify_attack(self, attacking_territory, defending_territory, num_attacking):
         # verify battle phase
@@ -442,18 +465,7 @@ class Game:
         return player
 
 
-    # Makes sure the card turn belongs to the current player.
-    def require_card_turn(self):
-        player = self.card_player()
-
-        if player.player_id != self.card_turn_player:
-            raise ValueError(
-                "Call begin_card_turn for the current player first."
-            )
-
-        return player
-
-
+    # TODO: REMOVE - replaced by start_turn()
     # Starts the current player's card turn and resets turn-specific state.
     def begin_card_turn(self):
         player = self.card_player()
@@ -487,7 +499,7 @@ class Game:
     def mark_territory_captured(self):
         self.require_card_turn()
 
-        if self.card_phase != "attack":
+        if self.phase != "attack":
             raise ValueError("Captures must occur in the attack phase.")
 
         self.captured_this_turn = True
@@ -496,11 +508,6 @@ class Game:
     # Awards one card at the end of a turn if the player captured a territory.
     def draw_card(self):
         player = self.require_card_turn()
-
-        if self.card_phase != "end":
-            raise ValueError(
-                "Reward cards are drawn at the end of a turn."
-            )
 
         # Players can earn only one reward card per turn.
         if not self.captured_this_turn or self.card_drawn_this_turn:
@@ -545,7 +552,7 @@ class Game:
     def redeem_card(self, card_ids, bonus_territory=None):
         player = self.require_card_turn()
 
-        if self.card_phase != "deploy":
+        if self.phase != "deploy":
             raise ValueError("Trade cards during deployment.")
 
         ids = list(card_ids)
@@ -640,7 +647,7 @@ class Game:
 
     # Transfers an eliminated opponent's cards to the current player.
     def transfer_cards(self, eliminated_player_id):
-        winner = self.require_card_turn()
+        winner = self.card_player()
         loser = self.card_player(eliminated_player_id)
 
         # The current player cannot take their own cards.
@@ -700,8 +707,7 @@ class Game:
                 for card in self.card_discard
             ],
             "trades": self.card_trades,
-            "phase": self.card_phase,
-            "turn_player": self.card_turn_player,
+            "phase": self.phase,
             "captured": self.captured_this_turn,
             "drawn": self.card_drawn_this_turn,
             "territory_bonus_used": self.territory_bonus_used
