@@ -31,19 +31,19 @@ class PlayingScreen(Screen):
         self.game.add_player(
             "Player 2",
             constants.PLAYER_BLUE,
-            is_bot=True
+            #is_bot=True
         )
         # Temporary players for testing
         self.game.add_player(
             "Player 3",
             constants.PLAYER_GREEN,
-            is_bot=True
+            #is_bot=True
         )
 
         self.game.add_player(
             "Player 4",
             constants.PLAYER_YELLOW,
-            is_bot=True
+            #is_bot=True
         )
 
         self.game.start_setup()
@@ -66,7 +66,6 @@ class PlayingScreen(Screen):
 
 
     def handle_event(self, event):
-        self.map_screen.handle_click(event)
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 
