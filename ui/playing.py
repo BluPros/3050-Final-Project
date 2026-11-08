@@ -41,6 +41,10 @@ class PlayingOverlay:
             Button(self.surface, 10, 10, 140, 40,
                    text="Help", onClick=self.end_phase,
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
+                   hoverColour=constants.BUTTON_HOVER_COLOR),
+            Button(self.surface, 810, 510, 180, 147,
+                   text="Cards", onClick=self.end_phase, # Have to add real onClick Method
+                   inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR)
         ]
 
