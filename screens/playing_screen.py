@@ -27,7 +27,7 @@ class PlayingScreen(Screen):
         self.widgets = self.playing_overlay.widgets
         self.deploy_widgets = self.playing_overlay.deploy_widgets
 
->>>>>>> origin/full-logic
+
         self.map_screen = MapScreen(
             constants.VISIBLE_MAP,
             constants.MASK_MAP,

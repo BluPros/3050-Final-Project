@@ -72,7 +72,6 @@ class PlayingOverlay:
             # Cards Menu Button
             Button(self.surface, 810, 510, 180, 147,
                    text="Cards", onClick=lambda: print("Cards button not implemented"), # Have to add real onClick Method
-                   text="Help", onClick=lambda: print("printed help from playing screen"),
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR)
         ]
