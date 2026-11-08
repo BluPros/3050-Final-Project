@@ -31,13 +31,13 @@ class PlayingOverlay:
         )
 
 
-    # maintains clicked order for battle, move, fortify, etc.
-    self.selected_src = None
-    self.selected_dst = None
-    # true after conquest, until confirms move-in
-    self.moving_in = False
-    # if owners are changing
-    self.map_limbo = False
+        # maintains clicked order for battle, move, fortify, etc.
+        self.selected_src = None
+        self.selected_dst = None
+        # true after conquest, until confirms move-in
+        self.moving_in = False
+        # if owners are changing
+        self.map_limbo = False
 
     def clear_selection(self):
 

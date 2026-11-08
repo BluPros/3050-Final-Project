@@ -26,6 +26,8 @@ class PlayingScreen(Screen):
         
         self.widgets = self.playing_overlay.widgets
         self.deploy_widgets = self.playing_overlay.deploy_widgets
+        self.attack_widgets = self.playing_overlay.attack_widgets
+        self.fortify_widgets = self.playing_overlay.fortify_widgets
 
 
         self.map_screen = MapScreen(
@@ -210,6 +212,11 @@ class PlayingScreen(Screen):
     def update(self):
         self.map_screen.update()
 
+        if self.game.phase != self.last_phase:
+            self.last_phase = self.game.phase
+            self.playing_overlay.clear_selection()
+            self.playing_overlay.update_phase_widgets()
+
         if self.game.phase == "game_over":
             winner = self.game.get_player(self.game.winner_id)
 
@@ -291,6 +298,7 @@ class PlayingScreen(Screen):
         super().on_enter()
 
         self.last_bot_action = pygame.time.get_ticks()
+        self.playing_overlay.on_enter()
         self.playing_overlay.update_phase_widgets()
 
     def on_exit(self):
