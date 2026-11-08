@@ -1,3 +1,6 @@
+# WILL BROKE THIS WHILE LINKING EVERYTHING
+# HOPEFULLY WILL FIX
+
 import sys
 from pathlib import Path
 
