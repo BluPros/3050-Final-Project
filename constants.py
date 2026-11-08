@@ -23,6 +23,14 @@ TEXT_COLOR_GOLD = (200, 166, 117)
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
+# Game configuration limits
+MIN_PLAYERS = 3
+MAX_PLAYERS = 6
+
+# Game timing
+FPS = 60
+BOT_DELAY_MS = 500
+
 # MAP LAYERS
 VISIBLE_MAP = Path(__file__).parent / "assets" / "maps" / "risk_map_original.png"
 MASK_MAP = Path(__file__).parent / "assets" / "maps" / "risk_map_mask.png"

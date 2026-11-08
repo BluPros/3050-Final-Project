@@ -9,9 +9,10 @@ from ui.popups.confirmation_popup import ConfirmationPopUp
 from pygame_widgets.button import Button
 
 class NewGameMenu:
-    def __init__(self, screen, on_exit):
+    def __init__(self, screen, on_exit, on_start):
         self.surface = screen
         self.on_exit = on_exit
+        self.on_start = on_start
         self.players = []
         self.bots = []
         self.widgets = self.create_widgets()
@@ -84,10 +85,24 @@ class NewGameMenu:
         self.hide_widgets()
         self.confirmation_popup.show(message, self.start_game)
 
+    # gives new players distinct colors instead of just using red as before
+    def choose_unused_color(self, new_icon):
+        used_colors = {
+            icon.player_color
+            for icon in self.players + self.bots
+        }
+
+        for index, color in enumerate(constants.PLAYER_COLORS):
+            if color not in used_colors:
+                new_icon.color_index = index
+                new_icon.player_color = color
+                return
+            
     def add_player(self, surface):
         # Create new player and add to list
         if len(self.players) + len(self.bots) < 6 :
             player = PlayerIcon(surface)
+            self.choose_unused_color(player)
             self.players.append(player)
         # Reset all player coordinates and draw them
         self.reconfigure_players()
@@ -111,6 +126,7 @@ class NewGameMenu:
                              ]
 
             bot = BotIcon(surface, existing_names)
+            self.choose_unused_color(bot)
             self.bots.append(bot)
 
         self.reconfigure_players()
@@ -179,10 +195,19 @@ class NewGameMenu:
         confirmation_message = ""
         error_message = ""
         # Validating bot and player counts
-        if not (len(self.players) + len(self.bots) >= 3 and len(self.players) > 0):
-            error_message += (f"Invalid number of players.\nPlease ensure you have at least 3 total players, including "
-                              f"bots. \nAt least one player has to be human.\nYou currently have {len(self.bots)}"
-                              f" bot(s) and {len(self.players)} human player(s).\n")
+        total_players = len(self.players) + len(self.bots)
+
+        if not (
+            constants.MIN_PLAYERS <= total_players <= constants.MAX_PLAYERS
+            and len(self.players) >= 1
+            and len(self.bots) >= 1
+        ):
+            error_message += (
+                "Please select 3-6 total players.\n"
+                "You need at least one human and one bot.\n"
+                f"Currently: {len(self.players)} human(s), "
+                f"{len(self.bots)} bot(s).\n"
+            )
         # Validating all player names
         for index, player in enumerate(self.players):
             if player.name_input.getText().strip() == "":
@@ -228,4 +253,21 @@ class NewGameMenu:
             player.name_input.show()
 
     def start_game(self):
-        pass
+        player_settings = []
+
+        # Collect player settings for the game
+        for player in self.players:
+            player_settings.append({
+                "name": player.name_input.getText(),
+                "color": player.player_color,
+                "is_bot": False
+            })
+            
+        for bot in self.bots:
+            player_settings.append({
+                "name": bot.name,
+                "color": bot.player_color,
+                "is_bot": True
+            })
+
+        self.on_start(player_settings)

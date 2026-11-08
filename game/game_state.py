@@ -48,7 +48,6 @@ class Game:
 
         # Dictionary for starting army count based on player count
         self.starting_armies = {
-            2: 40,
             3: 35,
             4: 30,
             5: 25,
@@ -214,8 +213,8 @@ class Game:
     def start_setup(self):
         player_count = len(self.players)
 
-        # Only allow games with 2-6 players
-        if player_count < 2 or player_count > 6:
+        # Only allow games with 3-6 players
+        if not constants.MIN_PLAYERS <= player_count <= constants.MAX_PLAYERS:
             return False
 
         army_count = self.starting_armies[player_count]
