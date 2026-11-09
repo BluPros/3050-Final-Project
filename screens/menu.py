@@ -1,4 +1,4 @@
-""""""
+"""Child of base screen, displays menu and navigable buttons"""
 import pygame
 from pygame_widgets.button import Button
 import constants
@@ -7,6 +7,8 @@ from screens.base_screen import Screen
 # Menu Screen
 
 class MenuScreen(Screen):
+    """Child of base_screen, uses same defined behavior to build basic
+    menu and buttons for gameplay, navigation, help, quit"""
     def __init__(self, manager, window_width, window_height):
         super().__init__(manager)
         # Button Vars
@@ -40,9 +42,11 @@ class MenuScreen(Screen):
         ]
 
     def handle_event(self, event):
-        pass # pygame_widgets handle button clicks
+        """Inherited from base, potentially utilized for later events,
+        maybe not because it is just a menu pygame_widgets handle button clicks"""
 
     def draw(self, surface):
+        """Once again, inherited and called in manager to draw elements"""
         # pygame_widgets draw the buttons, draw title/background here
         ## Title
         surface.fill(constants.BACKGROUND_COLOR)
