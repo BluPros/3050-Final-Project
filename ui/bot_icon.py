@@ -1,7 +1,16 @@
-import pygame
 import random
+
+import pygame
+
 from pygame_widgets.button import Button
-from constants import *
+
+from constants import (
+    PLAYER_COLORS,
+    BOT_ICON_COLOR,
+    TEXT_COLOR,
+    ICON_WIDTH,
+    ICON_HEIGHT
+)
 
 BOT_NAMES = [
     "Colonel Mustard",
@@ -13,6 +22,7 @@ BOT_NAMES = [
 ]
 
 class BotIcon:
+    """Represents the icon for a bot in the game, including color selection and name display."""
     def __init__(self, surface, existing_names):
         self.surface = surface
         self.x_center = 0
@@ -104,4 +114,3 @@ class BotIcon:
         color_box_y = self.y_center - 33
         color_box = pygame.Rect(color_box_x, color_box_y, 66, 66)
         pygame.draw.rect(surface, self.player_color, color_box)
-

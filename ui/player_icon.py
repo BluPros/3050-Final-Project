@@ -1,9 +1,19 @@
 import pygame
 from pygame_widgets.button import Button
 from pygame_widgets.textbox import TextBox
-from constants import *
+from constants import (
+    WHITE,
+    BLACK,
+    GRAY,
+    PLAYER_COLORS,
+    PLAYER_ICON_COLOR,
+    TEXT_COLOR,
+    ICON_WIDTH,
+    ICON_HEIGHT
+)
 
 class PlayerIcon:
+    """Represents the icon for a player in the game, including color selection and name input."""
     def __init__(self, surface):
         self.surface = surface
         self.x_center = 0

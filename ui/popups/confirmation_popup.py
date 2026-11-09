@@ -3,6 +3,7 @@ from ui.popups.popup import PopUp
 from constants import BUTTON_COLOR, WHITE, BUTTON_HOVER_COLOR
 
 class ConfirmationPopUp(PopUp):
+    """Represents a confirmation popup, asking the user to confirm an action."""
     def __init__(self, surface, on_close=None):
         super().__init__(surface, on_close=on_close)
 
@@ -35,7 +36,7 @@ class ConfirmationPopUp(PopUp):
         self.back_button.hide()
         self.confirm_button.hide()
 
-    def show(self, message, on_confirm):
+    def show(self, message, on_confirm=None):
         super().show(message)
         self.on_confirm = on_confirm
 

@@ -11,6 +11,7 @@ SYMBOLS = ("infantry", "cavalry", "artillery")
 # Stores the ID, territory, and symbol of a single card.
 @dataclass(frozen=True)
 class Card:
+    """Represents a single Risk card with an ID, territory, and symbol."""
     card_id: str
     territory: str | None
     symbol: str
@@ -95,7 +96,11 @@ def valid_set(cards):
 
 # Calculates the reward based on the number of sets already traded by all players.
 def trade_value(previous_trades):
-    if type(previous_trades) is not int or previous_trades < 0:
+    if (
+        not isinstance(previous_trades, int)
+        or isinstance(previous_trades, bool)
+        or previous_trades < 0
+    ):
         raise ValueError("Trade count must be a nonnegative integer.")
 
     starting_values = (4, 6, 8, 10, 12, 15)

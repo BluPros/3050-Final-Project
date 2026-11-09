@@ -3,6 +3,7 @@ from ui.popups.popup import PopUp
 from constants import BUTTON_COLOR, WHITE, BUTTON_HOVER_COLOR
 
 class ErrorPopUp(PopUp):
+    """Represents an error popup, informing the user of an error."""
     def __init__(self, surface, on_close=None):
         super().__init__(surface, on_close=on_close)
 

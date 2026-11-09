@@ -23,7 +23,7 @@ class Territory:
     troops: int = 0
 
     def is_neighbor(self, territory_name: str) -> bool:
-        """Checks if given string is in set of neighbors, 
+        """Checks if given string is in set of neighbors,
            returns True if found, otherwise False"""
         return territory_name in self.neighbors
 

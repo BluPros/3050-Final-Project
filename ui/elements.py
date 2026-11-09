@@ -5,7 +5,13 @@ import pygame
 
 
 class Button:
-    def __init__(self, text, x, y, width, height, action, color, hover_color=None, text_color=(0, 0, 0), font_size=32):
+    """Represents a simple button element for the UI."""
+    def __init__(
+            self, text, x, y, width, height, action,
+            color, hover_color=None, text_color=(0, 0, 0),
+            font_size=32
+            ):
+
         self.text = text
         self.rect = pygame.Rect(x, y, width, height)
         self.action = action

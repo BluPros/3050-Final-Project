@@ -1,14 +1,24 @@
 import pygame
+from pygame_widgets.button import Button
 
 import constants
-from constants import *
+from constants import (
+    WHITE,
+    BUTTON_COLOR,
+    BUTTON_HOVER_COLOR,
+    BACKGROUND_COLOR,
+    TEXT_COLOR,
+    PLAYER_ICON_COLOR,
+    BOT_ICON_COLOR,
+    ICON_X_POSITIONS,
+)
 from ui.player_icon import PlayerIcon
 from ui.bot_icon import BotIcon
 from ui.popups.error_popup import ErrorPopUp
 from ui.popups.confirmation_popup import ConfirmationPopUp
-from pygame_widgets.button import Button
 
 class NewGameMenu:
+    """Handles setup of players and bots"""
     def __init__(self, screen, on_exit, on_start):
         self.surface = screen
         self.on_exit = on_exit
@@ -30,28 +40,40 @@ class NewGameMenu:
         buttons = [
             # remove player button
             Button(self.surface, 220, 220, 40, 40,
-                   text="-", onClick=lambda: self.remove_player(),
-                   inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
+                   text="-", onClick=self.remove_player,
+                   inactiveColour=BUTTON_COLOR,
+                    pressedColour=WHITE,
+                    hoverColour=BUTTON_HOVER_COLOR),
             # add Player Button
             Button(self.surface, 380, 220, 40, 40,
                    text="+", onClick=lambda: self.add_player(self.surface),
-                   inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
+                   inactiveColour=BUTTON_COLOR,
+                    pressedColour=WHITE,
+                    hoverColour=BUTTON_HOVER_COLOR),
             # remove Bot Button
             Button(self.surface, 860, 220, 40, 40,
                    text="-", onClick=lambda: self.remove_bot(),
-                   inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
+                   inactiveColour=BUTTON_COLOR,
+                    pressedColour=WHITE,
+                    hoverColour=BUTTON_HOVER_COLOR),
             # add Bot Button
             Button(self.surface, 1020, 220, 40, 40,
                    text="+", onClick=lambda: self.add_bot(self.surface),
-                   inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
+                   inactiveColour=BUTTON_COLOR,
+                    pressedColour=WHITE,
+                    hoverColour=BUTTON_HOVER_COLOR),
             # Back Button
             Button(self.surface, 320, 640, 160, 60,
-                   text="Back", onClick=lambda: self.back_to_main(),
-                   inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
+                   text="Back", onClick=self.back_to_main,
+                   inactiveColour=BUTTON_COLOR,
+                    pressedColour=WHITE,
+                    hoverColour=BUTTON_HOVER_COLOR),
             # Confirm Button
             Button(self.surface, 800, 640, 160, 60,
-                   text="Confirm", onClick=lambda: self.confirm(),
-                   inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR)
+                   text="Confirm", onClick=self.confirm,
+                   inactiveColour=BUTTON_COLOR,
+                    pressedColour=WHITE,
+                    hoverColour=BUTTON_HOVER_COLOR)
         ]
         return buttons
 
@@ -97,7 +119,7 @@ class NewGameMenu:
                 new_icon.color_index = index
                 new_icon.player_color = color
                 return
-            
+
     def add_player(self, surface):
         # Create new player and add to list
         if len(self.players) + len(self.bots) < 6 :
@@ -212,14 +234,14 @@ class NewGameMenu:
         for index, player in enumerate(self.players):
             if player.name_input.getText().strip() == "":
                 error_message += f"Please enter a name for player {index + 1}.\n"
-                
+
         # Validate player colors
         current_selected_colors = []
         for icon in self.players + self.bots:
             current_selected_colors.append(icon.player_color)
         if len(set(current_selected_colors)) != len(current_selected_colors):
             error_message += "Please ensure that all players have unique colors.\n"
-        
+
         # If there are no errors, create confirmation message
         if error_message == "":
             confirmation_message += "Everything looks good! Your current players are:\n"
@@ -262,7 +284,7 @@ class NewGameMenu:
                 "color": player.player_color,
                 "is_bot": False
             })
-            
+
         for bot in self.bots:
             player_settings.append({
                 "name": bot.name,

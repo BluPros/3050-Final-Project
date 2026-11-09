@@ -18,15 +18,15 @@ class GameStateManager:
 
         # All available game states/screens
         self.screens = {
-            "menu": menu.MenuScreen(self, 
+            "menu": menu.MenuScreen(self,
                     constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
-            "playing": playing_screen.PlayingScreen(self, 
+            "playing": playing_screen.PlayingScreen(self,
                     constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
-            "instructions": instructions.InstructionScreen(self, 
+            "instructions": instructions.InstructionScreen(self,
                     constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
-            "new_game": new_game_screen.NewGameScreen(self, 
+            "new_game": new_game_screen.NewGameScreen(self,
                     constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
-            "game_over": game_over_screen.GameOverScreen(self, 
+            "game_over": game_over_screen.GameOverScreen(self,
                     constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
             # "help": HelpScreen(self)
         }

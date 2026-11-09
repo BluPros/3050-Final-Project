@@ -10,6 +10,7 @@ from game.dice import RiskDice
 
 
 class TestRiskDice(unittest.TestCase):
+    """Tests for the RiskDice class."""
     def test_valid_roles(self):
         for role in ("attacker", "defender"):
             with self.subTest(role=role):

@@ -2,6 +2,7 @@
 # is explicit
 
 class Screen:
+    """Defines the base interface for all screens in the game."""
     def __init__(self, manager):
         self.manager = manager
         self.widgets = []

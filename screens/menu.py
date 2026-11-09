@@ -7,8 +7,7 @@ from screens.base_screen import Screen
 # Menu Screen
 
 class MenuScreen(Screen):
-    """Child of base_screen, uses same defined behavior to build basic
-    menu and buttons for gameplay, navigation, help, quit"""
+    """Displays the main menu screen"""
     def __init__(self, manager, window_width, window_height):
         super().__init__(manager)
         # Button Vars

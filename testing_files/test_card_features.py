@@ -1,7 +1,3 @@
-import sys
-from pathlib import Path
-
-
 SYSTEM_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SYSTEM_ROOT))
 
@@ -141,7 +137,7 @@ def main():
     if len(game.card_discard) != 3:
         fail("The three traded cards should be in the discard pile.")
 
-    if player.cards != []:
+    if player.cards:
         fail("The traded cards should be removed from the player's hand.")
 
     print("PASS: Card trading")
@@ -310,7 +306,7 @@ def main():
     if card not in player.cards:
         fail("The transferred card is missing from the current player's hand.")
 
-    if other_player.cards != []:
+    if other_player.cards:
         fail("The opponent's hand should be empty after the transfer.")
 
     print("PASS: Card transfers")
@@ -337,7 +333,7 @@ def main():
     if len(game.card_deck) != 2:
         fail("Two cards should remain after recycling and drawing.")
 
-    if game.card_discard != []:
+    if game.card_discard:
         fail("The discard pile should be empty after recycling.")
 
     print("PASS: Discard recycling")

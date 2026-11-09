@@ -5,6 +5,7 @@ from screens.base_screen import Screen
 
 
 class GameOverScreen(Screen):
+    """Displays the game over screen with the winner and a main menu button."""
     def __init__(self, manager, window_width, window_height):
         super().__init__(manager)
 

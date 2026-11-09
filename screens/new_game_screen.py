@@ -3,9 +3,14 @@ from ui.new_game_menu import NewGameMenu
 from screens.base_screen import Screen
 
 class NewGameScreen(Screen):
-    def __init__(self, manager, window_width, window_height):
+    """Represents the screen for starting a new game in the Risk game."""
+    def __init__(self, manager, _window_width, _window_height):
         super().__init__(manager)
-        self.new_game_menu = NewGameMenu(screen=manager.screen, on_exit=manager.go_back, on_start=manager.start_configured_game)
+        self.new_game_menu = NewGameMenu(
+            screen=manager.screen,
+            on_exit=manager.go_back,
+            on_start=manager.start_configured_game
+        )
 
         self.widgets = self.new_game_menu.widgets
 
@@ -28,7 +33,7 @@ class NewGameScreen(Screen):
 
         for player in self.new_game_menu.players:
             player.name_input.show()
-    
+
     def on_exit(self):
         super().on_exit()
         self.new_game_menu.hide_widgets()

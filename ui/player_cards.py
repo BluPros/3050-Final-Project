@@ -1,7 +1,13 @@
 import pygame
-from constants import *
+from constants import (
+    CARD_WIDTH,
+    CARD_Y_CENTER,
+    CARD_HEIGHT,
+    TEXT_COLOR
+)
 
-class PlayerIcon:
+class PlayerCard:
+    """Displays the player stats during gameplay"""
     def __init__(self, surface, player):
         self.surface = surface
         self.x_center = 0
@@ -14,11 +20,16 @@ class PlayerIcon:
 
     def draw(self, surface):
         # Draw Background Rectangle
-        bg_rect = pygame.Rect(self.x_center-CARD_WIDTH//2, self.y_center-CARD_HEIGHT//2, CARD_WIDTH, CARD_HEIGHT)
+        bg_rect = pygame.Rect(
+            self.x_center-CARD_WIDTH//2,
+            self.y_center-CARD_HEIGHT//2,
+            CARD_WIDTH,
+            CARD_HEIGHT
+        )
         pygame.draw.rect(surface, self.player_color, bg_rect)
         # Write the player name to the screen
         font = pygame.font.SysFont("georgia", 12)
-        text_surface = font.render(self.player_name, True, TEXT_COLOR)
+        text_surface = font.render(self.name, True, TEXT_COLOR)
         text_x = self.x_center
         text_y = self.y_center - 3*CARD_HEIGHT//8
         text_rect = text_surface.get_rect()

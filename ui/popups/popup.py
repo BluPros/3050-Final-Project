@@ -1,7 +1,14 @@
 import pygame
-from constants import *
+from constants import (
+    WINDOW_WIDTH,
+    WINDOW_HEIGHT,
+    BACKGROUND_COLOR,
+    BUTTON_COLOR,
+    TEXT_COLOR
+)
 
 class PopUp:
+    """Represents a popup window in the game, displaying a message and handling close events."""
     def __init__(self, surface, message="", on_close=None):
         self.surface = surface
         self.message = message

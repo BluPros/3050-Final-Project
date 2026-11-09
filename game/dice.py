@@ -3,6 +3,7 @@ from typing import Literal
 
 
 class RiskDice:
+    """Represents a set of Risk dice for either an attacker or defender."""
     def __init__(self, role: Literal["attacker", "defender"]):
         if role not in ("attacker", "defender"):
             raise ValueError("Role must be 'attacker' or 'defender'.")
@@ -11,7 +12,7 @@ class RiskDice:
 
     def max_dice(self, armies: int) -> int:
         """Return the maximum legal dice count for this army count."""
-        if type(armies) is not int or armies < 1:
+        if not isinstance(armies, int) or isinstance(armies, bool) or armies < 1:
             raise ValueError("Armies must be a positive integer.")
 
         if self.role == "attacker":
@@ -35,7 +36,11 @@ class RiskDice:
         if num_dice is None:
             num_dice = maximum
 
-        if type(num_dice) is not int or not 1 <= num_dice <= maximum:
+        if (
+            not isinstance(num_dice, int)
+            or isinstance(num_dice, bool)
+            or not 1 <= num_dice <= maximum
+        ):
             raise ValueError(
                 f"With {armies} armies, the {self.role} must roll "
                 f"between 1 and {maximum} dice."

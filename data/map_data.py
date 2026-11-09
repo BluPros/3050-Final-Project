@@ -9,8 +9,8 @@ territories = {
         name="Alaska",
         continent="North America",
         neighbors=[
-            "Northwest Territory", 
-            "Alberta", 
+            "Northwest Territory",
+            "Alberta",
             "Kamchatka"
             ],
         mask_color=(255, 0, 0),
@@ -21,9 +21,9 @@ territories = {
         name="Northwest Territory",
         continent="North America",
         neighbors=[
-            "Alaska", 
-            "Alberta", 
-            "Ontario", 
+            "Alaska",
+            "Alberta",
+            "Ontario",
             "Greenland"
         ],
         mask_color=(0, 255, 0),
@@ -34,7 +34,7 @@ territories = {
         name="Alberta",
         continent="North America",
         neighbors=[
-            "Alaska", 
+            "Alaska",
             "Northwest Territory",
             "Ontario",
             "Western United States"

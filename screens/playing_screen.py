@@ -1,24 +1,28 @@
-import pygame
-import constants
 import random
-from ui.map_screen import MapScreen
+
+import pygame
+
+import constants
 from screens.base_screen import Screen
 from game.game_state import Game
 from ui.playing import PlayingOverlay
+from ui.map_screen import MapScreen
 
 # Playing Screen
 
 
 class PlayingScreen(Screen):
-    def __init__(self, manager, window_width, window_height):
+    """Handles gamplay, player inpu, and bot turns"""
+    def __init__(self, manager, _window_width, _window_height):
         super().__init__(manager)
 
         # Create the game object to store the state of the game, including players and territories
         self.game = Game()
+        self.last_phase = self.game.phase
 
         # Create the playing overlay
         self.playing_overlay = PlayingOverlay(
-            screen=manager.screen, 
+            screen=manager.screen,
             on_exit=manager.go_back,
             game=self.game,
             on_end_phase=self.advance_phase,
@@ -26,7 +30,7 @@ class PlayingScreen(Screen):
             on_deploy=self.deploy_troops,
             on_fortify=self.fortify_troops,
             on_attack=self.initiate_attack)
-        
+
         self.widgets = self.playing_overlay.widgets
         self.deploy_widgets = self.playing_overlay.deploy_widgets
         self.attack_widgets = self.playing_overlay.attack_widgets
@@ -62,7 +66,7 @@ class PlayingScreen(Screen):
         if not self.game.start_setup():
             raise ValueError("Game requires 3-6 players.")
 
-        # Update the existing overlay to use the new game 
+        # Update the existing overlay to use the new game
         self.playing_overlay.game = self.game
         self.playing_overlay.clear_selection()
         self.playing_overlay.map_limbo = False
@@ -113,7 +117,7 @@ class PlayingScreen(Screen):
             self.last_phase = self.game.phase
         else:
             print("Cannot advance phase yet.")
-            
+
     def handle_event(self, event):
 
         # Test for end screen: Force Player 1 to win
@@ -122,7 +126,7 @@ class PlayingScreen(Screen):
                 self.game.winner_id = self.game.players[0].player_id
                 self.game.phase = "game_over"
             return
-        
+
         self.map_screen.handle_click(event)
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -189,9 +193,17 @@ class PlayingScreen(Screen):
         # Draw the phase panel
         match self.game.phase:
             case "setup_claim":
-                self.playing_overlay.draw_setup(self.game.current_player, "Claim", self.map_screen.hovered_territory)
+                self.playing_overlay.draw_setup(
+                    self.game.current_player,
+                    "Claim",
+                    self.map_screen.hovered_territory
+                )
             case "setup_place":
-                self.playing_overlay.draw_setup(self.game.current_player, "Reinforce", self.map_screen.hovered_territory)
+                self.playing_overlay.draw_setup(
+                    self.game.current_player,
+                    "Reinforce",
+                    self.map_screen.hovered_territory
+                )
             case "deploy":
                 self.playing_overlay.draw_deploy(
                     self.game.current_player,
@@ -360,8 +372,11 @@ class PlayingScreen(Screen):
             elif attack_result is True:
                 print("Battle over and territory conquered.")
                 self.playing_overlay.moving_in = True
-                # Have to update troop counter to minimum number of troops to move into new territory
-                self.playing_overlay.attack_troop_counter = (self.game.pending_conquest["min_move"])
+                # Have to update troop counter to
+                # minimum number of troops to move into new territory
+                self.playing_overlay.attack_troop_counter = (
+                    self.game.pending_conquest["min_move"]
+                )
                 # Change attack button text
                 self.playing_overlay.attack_widgets[0].setText("Confirm Move In")
 

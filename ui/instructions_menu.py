@@ -1,14 +1,18 @@
-"""
-This class is intended to be...
-"""
+
 import pygame
-import pygame_widgets
 from pygame_widgets.button import ButtonArray
 from data.instructions import INSTRUCTIONS
-from constants import WINDOW_WIDTH, WINDOW_HEIGHT, BACKGROUND_COLOR, TEXT_COLOR, BUTTON_COLOR, BUTTON_HOVER_COLOR
+from constants import (WINDOW_WIDTH,
+    WINDOW_HEIGHT,
+    BACKGROUND_COLOR,
+    TEXT_COLOR,
+    BUTTON_COLOR,
+    BUTTON_HOVER_COLOR
+)
 
 
 class InstructionsMenu:
+    """Represents the instructions menu"""
     def __init__(self, screen, on_exit):
         self.screen = screen
         ## on_exit is a lambda function passed in through init
@@ -42,7 +46,7 @@ class InstructionsMenu:
                       lambda: self.change_tab("risk_cards"),
                       lambda: self.change_tab("fortify"),
                       lambda: self.change_tab("winning"),
-                      lambda: self.on_exit()
+                      lambda: self.on_exit
                       )
         )
         for button in buttons.buttons:

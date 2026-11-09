@@ -61,7 +61,7 @@ Place your reinforcements on territories you control. Use them to prepare attack
     "attack": """
 ATTACK
 
-Choose an enemy territory adjacent to one you control. Dashed-line connections also count as adjacent. Alaska and Kamchatka are connected across 
+Choose an enemy territory adjacent to one you control. Dashed-line connections also count as adjacent. Alaska and Kamchatka are connected across
 the map.
 
 REQUIREMENTS
@@ -74,11 +74,11 @@ Attacker: Choose 1, 2, or 3 dice. You need at least one more army than the numbe
 Defender: Chooses 1 or 2 dice. Two dice require at least 2 defending armies.
 
 BATTLE RESULTS
-The highest dice are compared first, followed by the next-highest pair if both sides rolled multiple dice. The lower die loses 1 army. Ties favor the defender. 
+The highest dice are compared first, followed by the next-highest pair if both sides rolled multiple dice. The lower die loses 1 army. Ties favor the defender.
 The attacker can lose no more than 2 armies per roll.
 
 CAPTURING TERRITORIES
-When the last defending army is defeated, you must occupy the territory immediately. Move in at least as many armies as the number of dice you rolled in 
+When the last defending army is defeated, you must occupy the territory immediately. Move in at least as many armies as the number of dice you rolled in
 your final battle. Leave at least 1 army in the territory you attacked from.
 
 If you capture at least one territory during your turn, you earn 1 Risk card at the end of your turn.
