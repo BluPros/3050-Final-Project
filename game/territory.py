@@ -42,5 +42,3 @@ class Territory:
 
         self.troops -= amount
         return True
-
-        

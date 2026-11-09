@@ -1,12 +1,16 @@
 import pygame
+from pygame_widgets.button import Button
+
+import constants
 from ui.popups.error_popup import ErrorPopUp
 from ui.popups.confirmation_popup import ConfirmationPopUp
-from pygame_widgets.button import Button
-import constants
 
 class PlayingOverlay:
-    def __init__(self, screen, on_exit, game, on_end_phase=None, on_help=None, on_deploy=None, on_fortify=None,
-                 on_attack=None):
+    """Manages the playing screen, including widgets, popups, and game state tracking."""
+    def __init__(
+            self, screen, on_exit, game, on_end_phase=None,
+            on_help=None, on_deploy=None, on_fortify=None,
+            on_attack=None):
         self.surface = screen
         self.on_exit = on_exit
         self.game = game
@@ -33,8 +37,14 @@ class PlayingOverlay:
         self.map_limbo = False
 
         self.create_widgets()
-        
-        self.hide_widgets(self.widgets + self.deploy_widgets + self.attack_widgets + self.fortify_widgets)
+
+        self.hide_widgets(
+            self.widgets
+            + self.deploy_widgets
+            + self.attack_widgets
+            + self.fortify_widgets
+            )
+
         self.error_popup = ErrorPopUp(
             self.surface,
             on_close=self.show_widgets
@@ -43,15 +53,6 @@ class PlayingOverlay:
             self.surface,
             on_close=self.show_widgets
         )
-
-
-        # maintains clicked order for battle, move, fortify, etc.
-        self.selected_src = None
-        self.selected_dst = None
-        # true after conquest, until confirms move-in
-        self.moving_in = False
-        # if owners are changing
-        self.map_limbo = False
 
     def clear_selection(self):
 
@@ -69,8 +70,6 @@ class PlayingOverlay:
 
         # if owners are changing
         self.map_limbo = False
-        self.create_widgets()
-
 
     def create_widgets(self):
         # Regular Buttons that show all the time.
@@ -80,7 +79,7 @@ class PlayingOverlay:
                    text="End Phase", onClick=self.end_phase,
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR),
-                   
+
             # Help Menu Button
             Button(self.surface, 10, 10, 140, 40,
                    text="Help", onClick=self.show_help,
@@ -88,48 +87,64 @@ class PlayingOverlay:
                    hoverColour=constants.BUTTON_HOVER_COLOR),
 
             # Cards Menu Button
-            Button(self.surface, 810, 510, 180, 147,
-                   text="Cards", onClick=lambda: print("Cards button not implemented"), # Have to add real onClick Method
-                   inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
-                   hoverColour=constants.BUTTON_HOVER_COLOR)
+            Button(
+                    self.surface, 810, 510, 180, 147,
+                    text="Cards",
+                    onClick=lambda: print("Cards button not implemented"),
+                    inactiveColour=constants.BUTTON_COLOR,
+                    pressedColour=constants.WHITE,
+                    hoverColour=constants.BUTTON_HOVER_COLOR
+                )
         ]
 
         # Deployment Phase widgets
         self.deploy_widgets =[
             # Deploy Troops button
-            Button(self.surface, 830, 386, constants.PANEL_WIDTH - 40, 40,
-                   text="Deploy Troops", onClick=self.deploy_troops,# TODO: placeholder onClick. Have to implement deploy button logic
-                   inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
-                   hoverColour=constants.BUTTON_HOVER_COLOR),
+            Button(
+                    self.surface, 830, 386,
+                    constants.PANEL_WIDTH - 40, 40,
+                    text="Deploy Troops",
+                    onClick=self.deploy_troops,
+                    inactiveColour=constants.BUTTON_COLOR,
+                    pressedColour=constants.WHITE,
+                    hoverColour=constants.BUTTON_HOVER_COLOR
+                ),
             # Remove troop button
-            Button(self.surface, constants.PANEL_X_CENTER - 70, 316, 40, 40,
-                   text="-", onClick=self.remove_deployment_troop,# TODO: placeholder onClick. Have to implement deploy button logic
-                   inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
-                   hoverColour=constants.BUTTON_HOVER_COLOR),
+            Button(
+                self.surface,
+                constants.PANEL_X_CENTER - 70, 316, 40, 40,
+                text="-",
+                onClick=self.remove_deployment_troop,
+                inactiveColour=constants.BUTTON_COLOR,
+                pressedColour=constants.WHITE,
+                hoverColour=constants.BUTTON_HOVER_COLOR
+            ),
             # Add Troop button
-            Button(self.surface, constants.PANEL_X_CENTER + 30, 316, 40, 40,
-                   text="+", onClick=self.add_deployment_troop,# TODO: placeholder onClick. Have to implement deploy button logic
-                   inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
-                   hoverColour=constants.BUTTON_HOVER_COLOR)
+            Button(
+                self.surface,
+                constants.PANEL_X_CENTER + 30, 316, 40, 40,
+                text="+",
+                onClick=self.add_deployment_troop,
+                inactiveColour=constants.BUTTON_COLOR,
+                pressedColour=constants.WHITE,
+                hoverColour=constants.BUTTON_HOVER_COLOR
+            )
         ]
         # Attack Phase widgets
         self.attack_widgets = [
             # Deploy Troops button
             Button(self.surface, 830, 390, constants.PANEL_WIDTH - 40, 40,
                    text="Initiate Attack", onClick=self.initiate_attack,
-                   # TODO: placeholder onClick. Have to implement deploy button logic
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR),
             # Remove troop button
             Button(self.surface, constants.PANEL_X_CENTER - 70, 340, 40, 40,
                    text="-", onClick=self.remove_attack_troop,
-                   # TODO: placeholder onClick. Have to implement deploy button logic
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR),
             # Add Troop button
             Button(self.surface, constants.PANEL_X_CENTER + 30, 340, 40, 40,
                    text="+", onClick=self.add_attack_troop,
-                   # TODO: placeholder onClick. Have to implement deploy button logic
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR)
         ]
@@ -138,19 +153,16 @@ class PlayingOverlay:
             # Deploy Troops button
             Button(self.surface, 830, 390, constants.PANEL_WIDTH - 40, 40,
                    text="Move Troops", onClick=self.fortify_troops,
-                   # TODO: placeholder onClick. Have to implement deploy button logic
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR),
             # Remove troop button
             Button(self.surface, constants.PANEL_X_CENTER - 70, 340, 40, 40,
                    text="-", onClick=self.remove_fortify_troop,
-                   # TODO: placeholder onClick. Have to implement deploy button logic
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR),
             # Add Troop button
             Button(self.surface, constants.PANEL_X_CENTER + 30, 340, 40, 40,
                    text="+", onClick=self.add_fortify_troop,
-                   # TODO: placeholder onClick. Have to implement deploy button logic
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR)
         ]
@@ -199,9 +211,7 @@ class PlayingOverlay:
                 self.attack_troop_counter = min(3, territory.troops - 1)
             elif not owned and self.selected_src and self.selected_src.is_neighbor(territory.name):
                 self.selected_dst = territory
-        
-        #TODO: not checking possible connection here but lowk fine, cause it happens either way
-        # probably will need to print my error messages n' stuff somehow
+
         elif self.game.phase == "fortify":
             if not owned:
                 return
@@ -280,29 +290,39 @@ class PlayingOverlay:
     def draw(self, surface):
         if surface is None:
             surface = self.surface
+
         # Background banner
         background_rect = pygame.Rect(
-            constants.BANNER_X_LEFT, constants.BANNER_Y_TOP, constants.BANNER_WIDTH, constants.BANNER_HEIGHT
+            constants.BANNER_X_LEFT,
+            constants.BANNER_Y_TOP,
+            constants.BANNER_WIDTH,
+            constants.BANNER_HEIGHT
         )
         pygame.draw.rect(surface, constants.BUTTON_COLOR, background_rect)
 
         match self.game.phase:
             case "deploy":
                 deploy_rect = pygame.Rect(
-                    constants.BANNER_X_LEFT + constants.BANNER_WIDTH // 2, constants.BANNER_Y_TOP + 5,
-                    constants.BANNER_WIDTH // 6 - 5, constants.BANNER_HEIGHT - 10
+                    constants.BANNER_X_LEFT + constants.BANNER_WIDTH // 2,
+                    constants.BANNER_Y_TOP + 5,
+                    constants.BANNER_WIDTH // 6 - 5,
+                    constants.BANNER_HEIGHT - 10
                 )
                 pygame.draw.rect(surface, constants.DEPLOY_COLOR, deploy_rect)
             case "attack":
                 attack_rect = pygame.Rect(
-                    constants.BANNER_X_LEFT + constants.BANNER_WIDTH // 3 * 2, constants.BANNER_Y_TOP + 5,
-                    constants.BANNER_WIDTH // 6 - 5, constants.BANNER_HEIGHT - 10
+                    constants.BANNER_X_LEFT + constants.BANNER_WIDTH // 3 * 2,
+                    constants.BANNER_Y_TOP + 5,
+                    constants.BANNER_WIDTH // 6 - 5,
+                    constants.BANNER_HEIGHT - 10
                 )
                 pygame.draw.rect(surface, constants.ATTACK_COLOR, attack_rect)
             case "fortify":
                 fortify_rect = pygame.Rect(
-                    constants.BANNER_X_LEFT + constants.BANNER_WIDTH // 6 * 5, constants.BANNER_Y_TOP + 5,
-                    constants.BANNER_WIDTH // 6 - 5, constants.BANNER_HEIGHT - 10
+                    constants.BANNER_X_LEFT + constants.BANNER_WIDTH // 6 * 5,
+                    constants.BANNER_Y_TOP + 5,
+                    constants.BANNER_WIDTH // 6 - 5,
+                    constants.BANNER_HEIGHT - 10
                 )
                 pygame.draw.rect(surface, constants.FORTIFY_COLOR, fortify_rect)
         # Current player name
@@ -349,14 +369,20 @@ class PlayingOverlay:
     def draw_setup(self, player, step, hover_territory=None):
         # Background Rectangle
         background_rect = pygame.Rect(
-            constants.PANEL_X_LEFT, constants.PANEL_Y_TOP, constants.PANEL_WIDTH, constants.PANEL_HEIGHT
+            constants.PANEL_X_LEFT,
+            constants.PANEL_Y_TOP,
+            constants.PANEL_WIDTH,
+            constants.PANEL_HEIGHT
         )
         pygame.draw.rect(
             self.surface, constants.CLAIM_COLOR, background_rect, border_radius=8
         )
         # Selected territory box
         selected_terr_rect = pygame.Rect(
-            constants.PANEL_X_LEFT + 20 , constants.PANEL_Y_TOP + 240, constants.PANEL_WIDTH - 40, 100
+            constants.PANEL_X_LEFT + 20,
+            constants.PANEL_Y_TOP + 240,
+            constants.PANEL_WIDTH - 40,
+            100
         )
         pygame.draw.rect(
             self.surface, constants.WHITE, selected_terr_rect, border_radius = 8
@@ -448,21 +474,36 @@ class PlayingOverlay:
                 )
 
     def draw_deploy(self, player, selected_territory=None):
-        # Background Rectangle
+        # Background rectangle
         background_rect = pygame.Rect(
-            constants.PANEL_X_LEFT, constants.PANEL_Y_TOP, constants.PANEL_WIDTH, constants.PANEL_HEIGHT
-        )
-        pygame.draw.rect(
-            self.surface, constants.DEPLOY_COLOR, background_rect, border_radius=8
+            constants.PANEL_X_LEFT,
+            constants.PANEL_Y_TOP,
+            constants.PANEL_WIDTH,
+            constants.PANEL_HEIGHT
         )
 
-        # Selected terr. rectangle
-        selected_terr_rect = pygame.Rect(
-            constants.PANEL_X_LEFT + 20, constants.PANEL_Y_TOP + 128, constants.PANEL_WIDTH - 40, 128
-        )
         pygame.draw.rect(
-            self.surface, constants.WHITE, selected_terr_rect, border_radius=8
+            self.surface,
+            constants.DEPLOY_COLOR,
+            background_rect,
+            border_radius=8
         )
+
+        # Selected territory rectangle
+        selected_terr_rect = pygame.Rect(
+            constants.PANEL_X_LEFT + 20,
+            constants.PANEL_Y_TOP + 128,
+            constants.PANEL_WIDTH - 40,
+            128
+        )
+
+        pygame.draw.rect(
+            self.surface,
+            constants.WHITE,
+            selected_terr_rect,
+            border_radius=8
+        )
+
         # Title
         self.draw_text(
             message="Deploy Troops",
@@ -549,21 +590,30 @@ class PlayingOverlay:
     def draw_attack(self, player, attacking_territory=None, defending_territory=None):
         # Background Rectangle
         background_rect = pygame.Rect(
-            constants.PANEL_X_LEFT, constants.PANEL_Y_TOP, constants.PANEL_WIDTH, constants.PANEL_HEIGHT
+            constants.PANEL_X_LEFT,
+            constants.PANEL_Y_TOP,
+            constants.PANEL_WIDTH,
+            constants.PANEL_HEIGHT
         )
         pygame.draw.rect(
             self.surface, constants.ATTACK_COLOR, background_rect, border_radius=8
         )
         # Attacking From rectangle
         selected_terr_rect = pygame.Rect(
-            constants.PANEL_X_LEFT + 20, constants.PANEL_Y_TOP + 80, constants.PANEL_WIDTH - 40, 100
+            constants.PANEL_X_LEFT + 20,
+            constants.PANEL_Y_TOP + 80,
+            constants.PANEL_WIDTH - 40,
+            100
         )
         pygame.draw.rect(
             self.surface, constants.WHITE, selected_terr_rect, border_radius=8
         )
         # Defending terr. rectangle
         selected_terr_rect = pygame.Rect(
-            constants.PANEL_X_LEFT + 20, constants.PANEL_Y_TOP + 185, constants.PANEL_WIDTH - 40, 100
+            constants.PANEL_X_LEFT + 20,
+            constants.PANEL_Y_TOP + 185,
+            constants.PANEL_WIDTH - 40,
+            100
         )
         pygame.draw.rect(
             self.surface, constants.WHITE, selected_terr_rect, border_radius=8
@@ -670,21 +720,30 @@ class PlayingOverlay:
     def draw_fortify(self, player, moving_from_territory, moving_to_territory):
         # Background Rectangle
         background_rect = pygame.Rect(
-            constants.PANEL_X_LEFT, constants.PANEL_Y_TOP, constants.PANEL_WIDTH, constants.PANEL_HEIGHT
+            constants.PANEL_X_LEFT,
+            constants.PANEL_Y_TOP,
+            constants.PANEL_WIDTH,
+            constants.PANEL_HEIGHT
         )
         pygame.draw.rect(
             self.surface, constants.FORTIFY_COLOR, background_rect, border_radius=8
         )
         # Attacking From rectangle
         selected_terr_rect = pygame.Rect(
-            constants.PANEL_X_LEFT + 20, constants.PANEL_Y_TOP + 80, constants.PANEL_WIDTH - 40, 100
+            constants.PANEL_X_LEFT + 20,
+            constants.PANEL_Y_TOP + 80,
+            constants.PANEL_WIDTH - 40,
+            100
         )
         pygame.draw.rect(
             self.surface, constants.WHITE, selected_terr_rect, border_radius=8
         )
         # Defending terr. rectangle
         selected_terr_rect = pygame.Rect(
-            constants.PANEL_X_LEFT + 20, constants.PANEL_Y_TOP + 185, constants.PANEL_WIDTH - 40, 100
+            constants.PANEL_X_LEFT + 20,
+            constants.PANEL_Y_TOP + 185,
+            constants.PANEL_WIDTH - 40,
+            100
         )
         pygame.draw.rect(
             self.surface, constants.WHITE, selected_terr_rect, border_radius=8

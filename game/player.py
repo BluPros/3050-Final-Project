@@ -9,6 +9,7 @@ import constants
 
 @dataclass
 class Player:
+    """Stores information about a player, including their territories, reinforcements, and cards."""
     player_id: int
     name: str
     color: tuple[int, int, int]
