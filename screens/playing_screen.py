@@ -22,10 +22,15 @@ class PlayingScreen(Screen):
             on_exit=manager.go_back,
             game=self.game,
             on_end_phase=self.advance_phase,
-            on_help=lambda: manager.change_screen("instructions"))
+            on_help=lambda: manager.change_screen("instructions"),
+            on_deploy=self.deploy_troops,
+            on_fortify=self.fortify_troops,
+            on_attack=self.initiate_attack)
         
         self.widgets = self.playing_overlay.widgets
         self.deploy_widgets = self.playing_overlay.deploy_widgets
+        self.attack_widgets = self.playing_overlay.attack_widgets
+        self.fortify_widgets = self.playing_overlay.fortify_widgets
 
 
         self.map_screen = MapScreen(
@@ -210,6 +215,11 @@ class PlayingScreen(Screen):
     def update(self):
         self.map_screen.update()
 
+        if self.game.phase != self.last_phase:
+            self.last_phase = self.game.phase
+            self.playing_overlay.clear_selection()
+            self.playing_overlay.update_phase_widgets()
+
         if self.game.phase == "game_over":
             winner = self.game.get_player(self.game.winner_id)
 
@@ -293,6 +303,7 @@ class PlayingScreen(Screen):
         self.playing_overlay.show_widgets(self.playing_overlay.widgets)
 
         self.last_bot_action = pygame.time.get_ticks()
+        self.playing_overlay.on_enter()
         self.playing_overlay.update_phase_widgets()
 
     def on_exit(self):
@@ -303,3 +314,66 @@ class PlayingScreen(Screen):
             + self.playing_overlay.attack_widgets
             + self.playing_overlay.fortify_widgets
         )
+
+    # Kind of awkward having this here, but since the playing screen has a game overlay
+    # and a playing overlay, we need functions to communicate between the two.
+    def deploy_troops(self):
+        territory = self.playing_overlay.selected_src
+        count = self.playing_overlay.deploy_troop_counter
+
+        if territory is None or count <= 0:
+            return
+
+        successful_deployment = self.game.deploy(territory.name, count)
+
+        if successful_deployment:
+            self.playing_overlay.clear_selection()
+
+    def initiate_attack(self):
+
+        src = self.playing_overlay.selected_src
+        dst = self.playing_overlay.selected_dst
+        count = self.playing_overlay.attack_troop_counter
+
+        if src is None or dst is None or count <= 0:
+            return
+
+        # First checking whether moving into a conquered territory or attacking
+        # If conquering, move troops in.
+        # If attacking, attack.
+        if self.playing_overlay.moving_in:
+            successful_move_in = self.game.move_in(count)
+            if successful_move_in:
+                self.playing_overlay.clear_selection()
+                self.map_screen.rebuild_ownership_overlay()
+                #Change attack button text back
+                self.playing_overlay.attack_widgets[0].setText("Initiate Attack")
+        else:
+            attack_result = self.game.attack(src.name, dst.name, count)
+
+            if attack_result is None:
+                print("Bad attack")
+            elif attack_result is False:
+                print("Battle is over, but territory wasn't conquered.")
+                # Have to update the attacking troops because the attacker lost troops?
+                self.playing_overlay.attack_troop_counter = min(3, max(0, src.troops - 1))
+            elif attack_result is True:
+                print("Battle over and territory conquered.")
+                self.playing_overlay.moving_in = True
+                # Have to update troop counter to minimum number of troops to move into new territory
+                self.playing_overlay.attack_troop_counter = (self.game.pending_conquest["min_move"])
+                # Change attack button text
+                self.playing_overlay.attack_widgets[0].setText("Confirm Move In")
+
+    def fortify_troops(self):
+        src = self.playing_overlay.selected_src
+        dst = self.playing_overlay.selected_dst
+        count = self.playing_overlay.fortify_troop_counter
+
+        if src is None or dst is None or count <= 0:
+            return
+
+        successful_fortify = self.game.fortify(src.name, dst.name, count)
+
+        if successful_fortify:
+            self.playing_overlay.clear_selection()

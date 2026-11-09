@@ -5,12 +5,16 @@ from pygame_widgets.button import Button
 import constants
 
 class PlayingOverlay:
-    def __init__(self, screen, on_exit, game, on_end_phase=None, on_help=None):
+    def __init__(self, screen, on_exit, game, on_end_phase=None, on_help=None, on_deploy=None, on_fortify=None,
+                 on_attack=None):
         self.surface = screen
         self.on_exit = on_exit
         self.game = game
         self.on_end_phase = on_end_phase
         self.on_help = on_help
+        self.on_deploy = on_deploy
+        self.on_fortify = on_fortify
+        self.on_attack = on_attack
         self.players = []
         self.widgets = []
         self.deploy_widgets = []
@@ -41,7 +45,13 @@ class PlayingOverlay:
         )
 
 
-
+        # maintains clicked order for battle, move, fortify, etc.
+        self.selected_src = None
+        self.selected_dst = None
+        # true after conquest, until confirms move-in
+        self.moving_in = False
+        # if owners are changing
+        self.map_limbo = False
 
     def clear_selection(self):
 
@@ -88,7 +98,7 @@ class PlayingOverlay:
         self.deploy_widgets =[
             # Deploy Troops button
             Button(self.surface, 830, 386, constants.PANEL_WIDTH - 40, 40,
-                   text="Deploy Troops", onClick=self.end_phase,# TODO: placeholder onClick. Have to implement deploy button logic
+                   text="Deploy Troops", onClick=self.deploy_troops,# TODO: placeholder onClick. Have to implement deploy button logic
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR),
             # Remove troop button
@@ -106,7 +116,7 @@ class PlayingOverlay:
         self.attack_widgets = [
             # Deploy Troops button
             Button(self.surface, 830, 390, constants.PANEL_WIDTH - 40, 40,
-                   text="Initiate Attack", onClick=self.end_phase,
+                   text="Initiate Attack", onClick=self.initiate_attack,
                    # TODO: placeholder onClick. Have to implement deploy button logic
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR),
@@ -127,7 +137,7 @@ class PlayingOverlay:
         self.fortify_widgets = [
             # Deploy Troops button
             Button(self.surface, 830, 390, constants.PANEL_WIDTH - 40, 40,
-                   text="Move Troops", onClick=self.end_phase,
+                   text="Move Troops", onClick=self.fortify_troops,
                    # TODO: placeholder onClick. Have to implement deploy button logic
                    inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
                    hoverColour=constants.BUTTON_HOVER_COLOR),
@@ -214,6 +224,10 @@ class PlayingOverlay:
         if self.deploy_troop_counter < player.reinforcements:
             self.deploy_troop_counter += 1
 
+    def deploy_troops(self):
+        if self.on_deploy is not None:
+            self.on_deploy()
+
     def remove_attack_troop(self):
         if self.moving_in:
             minimum = self.game.pending_conquest["min_move"]
@@ -237,16 +251,26 @@ class PlayingOverlay:
         if self.attack_troop_counter < limit:
             self.attack_troop_counter += 1
 
+    def initiate_attack(self):
+        if self.on_attack is not None:
+            self.on_attack()
+
     def remove_fortify_troop(self):
         if self.fortify_troop_counter > 0:
             self.fortify_troop_counter -= 1
 
     def add_fortify_troop(self):
-        territory = self.game.current_fortifying_territory
+        territory = self.selected_src
+
         if territory is None:
             return
-        if self.fortify_troop_counter < territory.troops:
+
+        if self.fortify_troop_counter < territory.troops - 1:
             self.fortify_troop_counter += 1
+
+    def fortify_troops(self):
+        if self.on_fortify is not None:
+            self.on_fortify()
 
     def configure_player_cards(self, players):
         player_x_coordinates = constants.CARD_X_POSITIONS.get(len(players), [])
@@ -254,12 +278,63 @@ class PlayingOverlay:
             player.x_center = x
 
     def draw(self, surface):
-        # Title
-        font = pygame.font.SysFont(constants.FONT_STYLE, 30)
-        text_surface = font.render("Playing Screen", True, constants.TEXT_COLOR)
-        text_rect = text_surface.get_rect()
-        text_rect.center = (640, 30)
-        surface.blit(text_surface, text_rect)
+        if surface is None:
+            surface = self.surface
+        # Background banner
+        background_rect = pygame.Rect(
+            constants.BANNER_X_LEFT, constants.BANNER_Y_TOP, constants.BANNER_WIDTH, constants.BANNER_HEIGHT
+        )
+        pygame.draw.rect(surface, constants.BUTTON_COLOR, background_rect)
+
+        match self.game.phase:
+            case "deploy":
+                deploy_rect = pygame.Rect(
+                    constants.BANNER_X_LEFT + constants.BANNER_WIDTH // 2, constants.BANNER_Y_TOP + 5,
+                    constants.BANNER_WIDTH // 6 - 5, constants.BANNER_HEIGHT - 10
+                )
+                pygame.draw.rect(surface, constants.DEPLOY_COLOR, deploy_rect)
+            case "attack":
+                attack_rect = pygame.Rect(
+                    constants.BANNER_X_LEFT + constants.BANNER_WIDTH // 3 * 2, constants.BANNER_Y_TOP + 5,
+                    constants.BANNER_WIDTH // 6 - 5, constants.BANNER_HEIGHT - 10
+                )
+                pygame.draw.rect(surface, constants.ATTACK_COLOR, attack_rect)
+            case "fortify":
+                fortify_rect = pygame.Rect(
+                    constants.BANNER_X_LEFT + constants.BANNER_WIDTH // 6 * 5, constants.BANNER_Y_TOP + 5,
+                    constants.BANNER_WIDTH // 6 - 5, constants.BANNER_HEIGHT - 10
+                )
+                pygame.draw.rect(surface, constants.FORTIFY_COLOR, fortify_rect)
+        # Current player name
+        self.draw_text(
+            message=self.game.current_player.name,
+            x=constants.BANNER_X_LEFT + constants.BANNER_WIDTH // 4,
+            y=constants.BANNER_Y_TOP + constants.BANNER_HEIGHT // 2,
+            font_size=20,
+            font_color=constants.TEXT_COLOR,
+            )
+        # Deploy, Attack, Fortify text
+        self.draw_text(
+            message="Deploy",
+            x=constants.BANNER_X_LEFT + constants.BANNER_WIDTH // 12 * 7,
+            y=constants.BANNER_Y_TOP + constants.BANNER_HEIGHT // 2,
+            font_size=20,
+            font_color=constants.TEXT_COLOR,
+        )
+        self.draw_text(
+            message="Attack",
+            x=constants.BANNER_X_LEFT + constants.BANNER_WIDTH // 4 * 3,
+            y=constants.BANNER_Y_TOP + constants.BANNER_HEIGHT // 2,
+            font_size=20,
+            font_color=constants.TEXT_COLOR,
+        )
+        self.draw_text(
+            message="Fortify",
+            x=constants.BANNER_X_LEFT + constants.BANNER_WIDTH // 12 * 11,
+            y=constants.BANNER_Y_TOP + constants.BANNER_HEIGHT // 2,
+            font_size=20,
+            font_color=constants.TEXT_COLOR,
+        )
 
     def draw_text(self, message, x, y, font_size, font_color=constants.TEXT_COLOR):
         # Make font object
@@ -706,7 +781,7 @@ class PlayingOverlay:
         )
         # Troops to move counter
         self.draw_text(
-            message=f"{self.attack_troop_counter}",
+            message=f"{self.fortify_troop_counter}",
             x=constants.PANEL_X_CENTER,
             y=constants.PANEL_Y_TOP + 345,
             font_size=20,
