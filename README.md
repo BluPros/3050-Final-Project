@@ -44,9 +44,30 @@ pip install pygame pygame_widgets
 ```
 python GameStateManager.py
 ```
-Expected Behavior:
-Upon running GameStateManager.py the user will load into a basic menu screen which allows navigation to our two active components; Instructions('Help'), InteractiveMap('Play'), current functionality limits menu control, i.e. we are missing a back button from the playing screen and currently the playing screen does not offer means to access the instructions, but further development will address both concerns. 
+### Expected Behavior:
+Upon running GameStateManager.py, the user will load into a basic menu screen which allows them to start a new game,
+continue an ongoing game, quit the program, or access the instructions.
 
+When clicking the "New Game" button, the user is directed to a new menu where they are able to set up the parameters
+for their game of Risk. The user can select between three and six players, one of which must be a bot. Players must
+also all have names and a unique color identifier. If these requirements are not met, an error pops up explaining why
+the user cannot proceed. If everything meets the requirements, a confirmation window will pop up, allowing the user
+to verify all player information before proceeding. When confirmed, the user is directed into the actual playing screen.
+
+The playing screen is shows the map, players in the game, and other game components. From here, players enter the
+initial setup phase, where they select territories they want, and then reinforce them once all territories have been
+claimed. After the initial setup phase, player's take turns in going through Risk's "Deploy", "Attack", and "Fortify"
+phases. Instructions for each of these phases are noted in the panel on the right-hand side of the screen.
+
+There is a "Help" button on the playing screen and the main menu. When clicked, the user can cycle through different
+instructions pages. When leaving this screen using the "Exit" button, the user is moved back to either the playing
+screen or the main menu, depending on where they were when entering the instructions menu.
+
+While in the playing screen, hitting the "esc" key on the keyboard transports the user back to the main menu. From
+there, they can either click "New Game" to begin a new game from scratch, or they can click "Continue" to resume their
+current game.
+
+The "Quit" button on the main menu screen safely exits the application.
 ### Testing
 The following describes our available testing files and various acceptable terminal commands to run them.
 ```
