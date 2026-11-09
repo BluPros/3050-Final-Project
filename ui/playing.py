@@ -271,7 +271,7 @@ class PlayingOverlay:
             constants.BANNER_X_LEFT, constants.BANNER_Y_TOP, constants.BANNER_WIDTH, constants.BANNER_HEIGHT
         )
         pygame.draw.rect(surface, constants.BUTTON_COLOR, background_rect)
-        # TODO: Current phase highlighting rectangle
+
         match self.game.phase:
             case "deploy":
                 deploy_rect = pygame.Rect(
