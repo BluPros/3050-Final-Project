@@ -42,10 +42,10 @@ pip install pygame pygame_widgets
 1. GameStateManager is the active main file.
 2. The project should be run from the repo root.
 ```
-python GameStateManager.py
+python game_state_manager.py
 ```
 ### Expected Behavior:
-Upon running GameStateManager.py, the user will load into a basic menu screen which allows them to start a new game,
+Upon running game_state_manager.py, the user will load into a basic menu screen which allows them to start a new game,
 continue an ongoing game, quit the program, or access the instructions.
 
 When clicking the "New Game" button, the user is directed to a new menu where they are able to set up the parameters
