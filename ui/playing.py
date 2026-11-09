@@ -264,12 +264,63 @@ class PlayingOverlay:
             player.x_center = x
 
     def draw(self, surface):
-        # Title
-        font = pygame.font.SysFont(constants.FONT_STYLE, 30)
-        text_surface = font.render("Playing Screen", True, constants.TEXT_COLOR)
-        text_rect = text_surface.get_rect()
-        text_rect.center = (640, 30)
-        surface.blit(text_surface, text_rect)
+        if surface is None:
+            surface = self.surface
+        # Background banner
+        background_rect = pygame.Rect(
+            constants.BANNER_X_LEFT, constants.BANNER_Y_TOP, constants.BANNER_WIDTH, constants.BANNER_HEIGHT
+        )
+        pygame.draw.rect(surface, constants.BUTTON_COLOR, background_rect)
+        # TODO: Current phase highlighting rectangle
+        match self.game.phase:
+            case "deploy":
+                deploy_rect = pygame.Rect(
+                    constants.BANNER_X_LEFT + constants.BANNER_WIDTH // 2, constants.BANNER_Y_TOP + 5,
+                    constants.BANNER_WIDTH // 6 - 5, constants.BANNER_HEIGHT - 10
+                )
+                pygame.draw.rect(surface, constants.DEPLOY_COLOR, deploy_rect)
+            case "attack":
+                attack_rect = pygame.Rect(
+                    constants.BANNER_X_LEFT + constants.BANNER_WIDTH // 3 * 2, constants.BANNER_Y_TOP + 5,
+                    constants.BANNER_WIDTH // 6 - 5, constants.BANNER_HEIGHT - 10
+                )
+                pygame.draw.rect(surface, constants.ATTACK_COLOR, attack_rect)
+            case "fortify":
+                fortify_rect = pygame.Rect(
+                    constants.BANNER_X_LEFT + constants.BANNER_WIDTH // 6 * 5, constants.BANNER_Y_TOP + 5,
+                    constants.BANNER_WIDTH // 6 - 5, constants.BANNER_HEIGHT - 10
+                )
+                pygame.draw.rect(surface, constants.FORTIFY_COLOR, fortify_rect)
+        # Current player name
+        self.draw_text(
+            message=self.game.current_player.name,
+            x=constants.BANNER_X_LEFT + constants.BANNER_WIDTH // 4,
+            y=constants.BANNER_Y_TOP + constants.BANNER_HEIGHT // 2,
+            font_size=20,
+            font_color=constants.TEXT_COLOR,
+            )
+        # Deploy, Attack, Fortify text
+        self.draw_text(
+            message="Deploy",
+            x=constants.BANNER_X_LEFT + constants.BANNER_WIDTH // 12 * 7,
+            y=constants.BANNER_Y_TOP + constants.BANNER_HEIGHT // 2,
+            font_size=20,
+            font_color=constants.TEXT_COLOR,
+        )
+        self.draw_text(
+            message="Attack",
+            x=constants.BANNER_X_LEFT + constants.BANNER_WIDTH // 4 * 3,
+            y=constants.BANNER_Y_TOP + constants.BANNER_HEIGHT // 2,
+            font_size=20,
+            font_color=constants.TEXT_COLOR,
+        )
+        self.draw_text(
+            message="Fortify",
+            x=constants.BANNER_X_LEFT + constants.BANNER_WIDTH // 12 * 11,
+            y=constants.BANNER_Y_TOP + constants.BANNER_HEIGHT // 2,
+            font_size=20,
+            font_color=constants.TEXT_COLOR,
+        )
 
     def draw_text(self, message, x, y, font_size, font_color=constants.TEXT_COLOR):
         # Make font object
