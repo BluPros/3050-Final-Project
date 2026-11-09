@@ -1,11 +1,14 @@
-import constants
-import pygame
+"""Controls overall game state, screen change logic"""
 import sys
-from screens import menu, playing_screen, instructions, new_game_screen, game_over_screen
+import pygame
 import pygame_widgets
+import constants
+from screens import menu, playing_screen, instructions, new_game_screen, game_over_screen
+
 
 
 class GameStateManager:
+    """Controls screen, screen changes, and acts as core game management tool"""
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode(
@@ -15,11 +18,16 @@ class GameStateManager:
 
         # All available game states/screens
         self.screens = {
-            "menu": menu.MenuScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
-            "playing": playing_screen.PlayingScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
-            "instructions": instructions.InstructionScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
-            "new_game": new_game_screen.NewGameScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
-            "game_over": game_over_screen.GameOverScreen(self, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
+            "menu": menu.MenuScreen(self, 
+                    constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
+            "playing": playing_screen.PlayingScreen(self, 
+                    constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
+            "instructions": instructions.InstructionScreen(self, 
+                    constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
+            "new_game": new_game_screen.NewGameScreen(self, 
+                    constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
+            "game_over": game_over_screen.GameOverScreen(self, 
+                    constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT),
             # "help": HelpScreen(self)
         }
         # On Init Default Screen is "menu"
@@ -27,29 +35,30 @@ class GameStateManager:
         self.previous_screen = None
         self.current_screen.on_enter()
 
-    # Starts a game with the given player settings
-    # player_settings: a dictionary containing the configuration for the players in the game
     def start_configured_game(self, player_settings):
-        playing_screen = self.screens["playing"]
+        """Starts a game with the given player settings
+        player_settings: a dictionary containing the configuration for the players in the game"""
+        current_playing_screen = self.screens["playing"]
 
-        playing_screen.configure_game(player_settings)
+        current_playing_screen.configure_game(player_settings)
 
         self.change_screen("playing")
 
-    # Resumes an existing game if one is in progress, otherwise goes to the new game screen
     def resume_or_new_game(self):
-        playing_screen = self.screens["playing"]
+        """Resumes an existing game if one is in progress, otherwise goes to the new game screen"""
+        current_playing_screen = self.screens["playing"]
 
         # Continue an existing unfinished game
         if (
-            playing_screen.game.players
-            and playing_screen.game.phase != "game_over"
+            current_playing_screen.game.players
+            and current_playing_screen.game.phase != "game_over"
         ):
             self.change_screen("playing")
         else:
             self.change_screen("new_game")
 
     def change_screen(self, name):
+        """change active screen"""
         # Update which screen is active (widgets)
         self.current_screen.on_exit()
 
@@ -63,6 +72,7 @@ class GameStateManager:
         self.current_screen.on_enter()
 
     def go_back(self):
+        """Go back to prev screen"""
         # check that prev screen exists
         if self.previous_screen is None:
             return
@@ -74,6 +84,7 @@ class GameStateManager:
         self.current_screen.on_enter()
 
     def start(self):
+        """Start gameStateManager init and active game maintained"""
         while True:
             # optional delta time var
             # dt = self.clock.tick(60) / 1000
@@ -89,6 +100,7 @@ class GameStateManager:
             pygame.display.flip()
 
     def quit_game(self):
+        """exit cleanly"""
         pygame.quit()
         sys.exit()
 

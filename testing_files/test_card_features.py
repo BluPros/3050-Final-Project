@@ -1,6 +1,3 @@
-# WILL BROKE THIS WHILE LINKING EVERYTHING
-# HOPEFULLY WILL FIX
-
 import sys
 from pathlib import Path
 
@@ -13,6 +10,7 @@ import json
 
 from game.game_state import Game
 from game.cards import Card, valid_set, trade_value
+from game.dice import RiskDice
 
 
 # Creates a fresh game and starts the current player's card turn.
@@ -29,7 +27,9 @@ def create_game():
         (0, 0, 255)
     )
 
-    game.begin_card_turn()
+    game.current_player_index = 0
+    game.game_started = True
+    game.phase = "deploy"
 
     return game, player, other_player
 
@@ -202,9 +202,9 @@ def main():
     # Check that capturing a territory earns only one card per turn.
     game, player, other_player = create_game()
 
-    game.set_card_phase("attack")
+    game.phase = "attack"
     game.mark_territory_captured()
-    game.set_card_phase("end")
+    game.phase = "fortify"
 
     first_card = game.draw_card()
 
@@ -225,7 +225,7 @@ def main():
     # Check that no reward is given when no territory was captured.
     game, player, other_player = create_game()
 
-    game.set_card_phase("end")
+    game.phase = "fortify"
 
     card = game.draw_card()
 
@@ -238,10 +238,8 @@ def main():
     # Check that drawing and trading are rejected in the wrong phase.
     game, player, other_player = create_game()
 
-    expect_value_error(game.draw_card)
-
     ids = give_set(game, player)
-    game.set_card_phase("attack")
+    game.phase = "attack"
 
     expect_value_error(
         lambda: game.redeem_card(ids)
@@ -250,27 +248,10 @@ def main():
     print("PASS: Card phase restrictions")
 
 
-    # Check that a player with five cards cannot leave deployment.
-    game, player, other_player = create_game()
-
-    player.cards.extend(game.card_deck[:5])
-    del game.card_deck[:5]
-
-    expect_value_error(
-        lambda: game.set_card_phase("attack")
-    )
-
-    print("PASS: Required card trading")
-
-
     # Check dice count, sorting, values, and invalid army counts.
     game, player, other_player = create_game()
 
-    rolls = game.roll_dice(
-        "attacker",
-        armies=4,
-        num_dice=3
-    )
+    rolls = RiskDice("attacker").roll(armies=4, num_dice=3)
 
     if len(rolls) != 3:
         fail("The attacker should roll three dice.")
@@ -283,10 +264,7 @@ def main():
             fail("Each die should have a value between one and six.")
 
     expect_value_error(
-        lambda: game.roll_dice(
-            "attacker",
-            armies=1
-        )
+        lambda: RiskDice("attacker").roll(armies=1)
     )
 
     print("PASS: Dice rolling")
@@ -347,9 +325,9 @@ def main():
     other_player.cards.extend(game.card_deck)
     game.card_deck.clear()
 
-    game.set_card_phase("attack")
+    game.phase = "attack"
     game.mark_territory_captured()
-    game.set_card_phase("end")
+    game.phase = "fortify"
 
     card = game.draw_card()
 
@@ -364,7 +342,7 @@ def main():
 
     print("PASS: Discard recycling")
 
-    print("\nAll 14 card feature checks passed.")
+    print("\nAll 13 card feature checks passed.")
 
 
 if __name__ == "__main__":

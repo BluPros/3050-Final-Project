@@ -1,8 +1,9 @@
+"""Map Screen builds the map, overlay, allows on-click events and draws troops"""
 import pygame
 
 class MapScreen:
-
-    # Initialize the MapScreen 
+    """Maps both the image and a mask to detect interaction"""
+    # Initialize the MapScreen
     def __init__(self, map_path, mask_path, game):
 
         # Store the game instance for later use
@@ -33,18 +34,17 @@ class MapScreen:
 
         self.font = pygame.font.Font(None, 30)
 
-        # This will be a dynamic overlay that we can use to highlight territories, show troop counts, etc. It will be drawn on top of the map image.
+        # This will be a dynamic overlay that we can use to highlight territories,
+        # show troop counts, etc. It will be drawn on top of the map image.
         self.ownership_overlay = pygame.Surface(self.map_image.get_size(), pygame.SRCALPHA)
-        
+
         self.rebuild_ownership_overlay()
 
         # Font for displaying troop counts on the map
         self.troop_font = pygame.font.Font(None, 22)
 
-
-
-    # Get the territory at a given position on the map
     def get_territory_at(self, position):
+        """Get the territory at a given position on the map"""
         mouse_x, mouse_y = position
 
         x = mouse_x - self.map_x
@@ -61,17 +61,17 @@ class MapScreen:
         rgb = (color.r, color.g, color.b)
 
         return self.color_lookup.get(rgb)
-    
-    # Update the hovered territory based on mouse position
+
     def update(self):
+        """Update the hovered territory based on mouse position"""
         mouse_position = pygame.mouse.get_pos()
 
         self.hovered_territory = self.get_territory_at(
             mouse_position
             )
-        
-    # Handle left clicks of territories
+
     def handle_click(self, event):
+        """Handle left clicks of territories"""
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: # Left mouse button click
             territory = self.get_territory_at(event.pos)
             if territory is not None:
@@ -79,7 +79,7 @@ class MapScreen:
                 print(f"Selected territory: {territory.name}")
 
     def draw(self, screen):
-
+        """Draw the risk map on given screen"""
         # Draw the visible Risk map
         screen.blit(self.map_image, (self.map_x, self.map_y))
 
@@ -88,74 +88,45 @@ class MapScreen:
 
         self.draw_troops(screen)
 
-        # Show the current player and phase
-        current_player = self.game.current_player
-
-        if current_player is not None:
-            turn_text = self.font.render(
-                f"{current_player.name} - {self.game.phase.upper()}",
-                True,
-                "white"
-            )
-
-        if current_player is not None:
-            turn_text = self.font.render(
-                f"{current_player.name} - {self.game.phase.upper()}",
-                True,
-                "white"
-            )
-
         # Probably won't need this again, but not deleted, just in case
-        """
-        if self.game.phase == "setup_place":
-            for index, player in enumerate(self.game.players):
-                remaining = self.game.setup_armies[player.player_id]
+        # (old debug display: turn label, setup armies left, hovered/selected territory)
+        #
+        # current_player = self.game.current_player
+        # if current_player is not None:
+        #     turn_text = self.font.render(
+        #         f"{current_player.name} - {self.game.phase.upper()}", True, "white"
+        #     )
+        #
+        # if self.game.phase == "setup_place":
+        #     for index, player in enumerate(self.game.players):
+        #         remaining = self.game.setup_armies[player.player_id]
+        #         remaining_text = self.font.render(
+        #             f"{player.name}: {remaining} left", True, player.color
+        #         )
+        #         screen.blit(remaining_text, (900, 150 + index * 30))
+        #     screen.blit(turn_text, (900, 120))
+        #
+        # if self.hovered_territory is not None:
+        #     mouse_x, mouse_y = pygame.mouse.get_pos()
+        #     text = self.font.render(
+        #         f"Hover: {self.hovered_territory.name} ({mouse_x}, {mouse_y})", True, "white"
+        #     )
+        #     screen.blit(text, (20, 20))
+        #
+        # if self.selected_territory is not None:
+        #     text = self.font.render(
+        #         f"Selected: {self.selected_territory.name}", True, "white"
+        #     )
+        #     screen.blit(text, (20, 50))
 
-                remaining_text = self.font.render(
-                    f"{player.name}: {remaining} left",
-                    True,
-                    player.color
-                )
-
-                screen.blit(
-                    remaining_text,
-                    (900, 150 + index * 30)
-                )
-
-            screen.blit(turn_text, (900, 120))
-
-    # Display hovered territory
-        if self.hovered_territory is not None:
-
-            # Get the coordinates of the mouse position 
-            #TODO - remove the mouse_x, mouse_y variables if they are not needed for anything else
-            mouse_x, mouse_y = pygame.mouse.get_pos()
-            text = self.font.render(
-                f"Hover: {self.hovered_territory.name} ({mouse_x}, {mouse_y})",
-                True,
-                "white"
-            )
-
-            screen.blit(text, (20, 20))
-
-        # Display selected territory
-        if self.selected_territory is not None:
-
-            text = self.font.render(
-                f"Selected: {self.selected_territory.name}",
-                True,
-                "white"
-            )
-
-            screen.blit(text, (20, 50))
-        """
-    # The rebuild_ownership_overlay function is responsible for updating the ownership overlay based on the current state of the game. 
-    # It checks each pixel in the territory mask and colors it according to the owner of the corresponding territory.
     def rebuild_ownership_overlay(self):
+        """ The rebuild_ownership_overlay function is responsible for updating the ownership
+        overlay based on the current state of the game. It checks each pixel in the
+        territory mask and colors it according to the owner of the corresponding territory."""
         # Clear the previous ownership colors
         self.ownership_overlay.fill((0, 0, 0, 0))
 
-        
+
         width = self.mask_image.get_width()
         height = self.mask_image.get_height()
 
@@ -200,9 +171,10 @@ class MapScreen:
                     )
 
     def draw_troops(self, screen):
+        """Draw number of troops on each territory"""
         for territory in self.game.territories.values():
 
-            
+
             if territory.owner_id is None:
                 continue
 
@@ -236,10 +208,9 @@ class MapScreen:
                 True,
                 (255, 255, 255)
             )
-            
+
             troop_center = troop_text.get_rect(
                 center=(x, y)
             )
 
             screen.blit(troop_text, troop_center)
-                        

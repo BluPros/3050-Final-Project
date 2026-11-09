@@ -42,10 +42,10 @@ pip install pygame pygame_widgets
 1. GameStateManager is the active main file.
 2. The project should be run from the repo root.
 ```
-python GameStateManager.py
+python game_state_manager.py
 ```
 ### Expected Behavior:
-Upon running GameStateManager.py, the user will load into a basic menu screen which allows them to start a new game,
+Upon running game_state_manager.py, the user will load into a basic menu screen which allows them to start a new game,
 continue an ongoing game, quit the program, or access the instructions.
 
 When clicking the "New Game" button, the user is directed to a new menu where they are able to set up the parameters
@@ -76,6 +76,13 @@ The following describes our available testing files and various acceptable termi
 python testing_files/test_dice.py
 python -m unittest testing_files/test_dice.py
 python -m testing_files.test_dice
+
+# Card Features
+# Runs 13 checks covering deck creation, set validation, trade values, trading and
+# territory bonuses, reward cards, phase restrictions, card transfers, and discard recycling.
+# Prints PASS for each check and stops at the first FAIL.
+python testing_files/test_card_features.py
+python -m testing_files.test_card_features
 
 # Instructions
 # Will open and allow interaction with help screen in a pygame window, shows all current rules and instructions.
