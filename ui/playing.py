@@ -19,7 +19,17 @@ class PlayingOverlay:
         self.attack_troop_counter = 0
         self.fortify_widgets = []
         self.fortify_troop_counter = 0
+
+        # Track selected territories
+        self.selected_src = None
+        self.selected_dst = None
+
+        # Track movement after conquering territories
+        self.moving_in = False
+        self.map_limbo = False
+
         self.create_widgets()
+        
         self.hide_widgets(self.widgets + self.deploy_widgets + self.attack_widgets + self.fortify_widgets)
         self.error_popup = ErrorPopUp(
             self.surface,
@@ -31,13 +41,7 @@ class PlayingOverlay:
         )
 
 
-    # maintains clicked order for battle, move, fortify, etc.
-    self.selected_src = None
-    self.selected_dst = None
-    # true after conquest, until confirms move-in
-    self.moving_in = False
-    # if owners are changing
-    self.map_limbo = False
+
 
     def clear_selection(self):
 
@@ -46,12 +50,16 @@ class PlayingOverlay:
         self.attack_troop_counter = 0
         self.fortify_troop_counter = 0
 
+        # maintains clicked order for battle, move, fortify, etc.
         self.selected_src = None
         self.selected_dst = None
+
+        # true after conquest, until confirms move-in
         self.moving_in = False
-        self.deploy_troop_counter = 0
-        self.attack_troop_counter = 0
-        self.fortify_troop_counter = 0
+
+        # if owners are changing
+        self.map_limbo = False
+        self.create_widgets()
 
 
     def create_widgets(self):

@@ -290,13 +290,16 @@ class PlayingScreen(Screen):
     def on_enter(self):
         super().on_enter()
 
+        self.playing_overlay.show_widgets(self.playing_overlay.widgets)
+
         self.last_bot_action = pygame.time.get_ticks()
         self.playing_overlay.update_phase_widgets()
 
     def on_exit(self):
         super().on_exit()
         self.playing_overlay.hide_widgets(
-            self.playing_overlay.deploy_widgets
+            self.playing_overlay.widgets
+            + self.playing_overlay.deploy_widgets
             + self.playing_overlay.attack_widgets
             + self.playing_overlay.fortify_widgets
         )
