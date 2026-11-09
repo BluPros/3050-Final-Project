@@ -1,10 +1,10 @@
+""""""
 import pygame
-from constants import *
 from pygame_widgets.button import Button
+import constants
 from screens.base_screen import Screen
 
 # Menu Screen
-# TODO: add title/background
 
 class MenuScreen(Screen):
     def __init__(self, manager, window_width, window_height):
@@ -17,18 +17,26 @@ class MenuScreen(Screen):
 
         # store buttons in self.widgets which hides and shows automatically
         self.widgets = [
-            Button(manager.screen, center_x - 1.5 * button_width, center_y + 100, button_width, button_height,
+            Button(manager.screen, center_x - 1.5 * button_width, center_y + 100,
+                   button_width, button_height,
                    text="New Game", onClick=lambda: manager.change_screen("new_game"),
-                   inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
-            Button(manager.screen, center_x - 0.5 * button_width, center_y + 100, button_width, button_height,
-                   text = "Continue", onClick=manager.resume_or_new_game,
-                   inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
-            Button(manager.screen, center_x + 0.5 * button_width, center_y + 100, button_width, button_height,
+                   inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
+                   hoverColour=constants.BUTTON_HOVER_COLOR),
+            Button(manager.screen, center_x - 0.5 * button_width, center_y + 100,
+                   button_width, button_height,
+                   text="Continue", onClick=manager.resume_or_new_game,
+                   inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
+                   hoverColour=constants.BUTTON_HOVER_COLOR),
+            Button(manager.screen, center_x + 0.5 * button_width, center_y + 100,
+                   button_width, button_height,
                    text="Quit", onClick=manager.quit_game,
-                   inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
-            Button(manager.screen, center_x + 1.5 * button_width, center_y + 100, button_width, button_height,
+                   inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
+                   hoverColour=constants.BUTTON_HOVER_COLOR),
+            Button(manager.screen, center_x + 1.5 * button_width, center_y + 100,
+                   button_width, button_height,
                    text="Help", onClick=lambda: manager.change_screen("instructions"),
-                   inactiveColour=BUTTON_COLOR, pressedColour=WHITE, hoverColour=BUTTON_HOVER_COLOR),
+                   inactiveColour=constants.BUTTON_COLOR, pressedColour=constants.WHITE,
+                   hoverColour=constants.BUTTON_HOVER_COLOR),
         ]
 
     def handle_event(self, event):
@@ -37,9 +45,9 @@ class MenuScreen(Screen):
     def draw(self, surface):
         # pygame_widgets draw the buttons, draw title/background here
         ## Title
-        surface.fill(BACKGROUND_COLOR)
-        font = pygame.font.SysFont(FONT_STYLE, 52)
-        text_surface = font.render("Risk! Global Domination.", True, TEXT_COLOR)
+        surface.fill(constants.BACKGROUND_COLOR)
+        font = pygame.font.SysFont(constants.FONT_STYLE, 52)
+        text_surface = font.render("Risk! Global Domination.", True, constants.TEXT_COLOR)
         text_rect = text_surface.get_rect()
         text_rect.center = (self.center_x, self.center_y)
         surface.blit(text_surface, text_rect)

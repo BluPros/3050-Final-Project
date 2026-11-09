@@ -1,12 +1,7 @@
-# Game Class
-# Should build fresh Territory objects, hold players and current_player, and phase
-# Can expose functionality:
-# attack(src, dst, n_dice)
-# fortify(...)
-
-# Playing screen would likely own one Game
-
-#############################################
+"""
+Game Class build fresh territory objects, holds players, current_players, phases, etc.
+can expose overall game functionality:
+"""
 from copy import deepcopy
 import random
 
@@ -17,7 +12,6 @@ from game.cards import make_deck, valid_set, trade_value
 from game.player import Player
 from game.dice import RiskDice, compare_rolls
 from game.map_utils import connected
-
 
 class Game:
     def __init__(self):
@@ -294,11 +288,7 @@ class Game:
         player = self.current_player
         player.add_reinforcements(self.allocate_troops(player.player_id))
 
-    # Ends the current player's turn, advancing to the next player and 
-    # resetting the phase to "deploy".
-    # TODO: worried that this might cause issues and allow skipping 
-    # TODO: unintended game phases, potentially worth, hiding the 
-    # TODO: button call until fortify phase
+    # Ends the current player's turn, advancing to the next player
     def end_turn(self):
         if not self.game_started or self.phase == "game_over":
             return
@@ -431,7 +421,6 @@ class Game:
         if not (player.owns_territory(dest_territory) and player.owns_territory(src_territory)):
             return self.reject("player does not own both territories")
 
-        # TODO: Should be handled somewhere else probabaly
         if source.troops <= count:
             return self.reject("not enough troops in the source territory to pull from")
 
