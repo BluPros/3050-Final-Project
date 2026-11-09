@@ -105,6 +105,8 @@ class MapScreen:
                 "white"
             )
 
+        # Probably won't need this again, but not deleted, just in case
+        """
         if self.game.phase == "setup_place":
             for index, player in enumerate(self.game.players):
                 remaining = self.game.setup_armies[player.player_id]
@@ -146,7 +148,7 @@ class MapScreen:
             )
 
             screen.blit(text, (20, 50))
-
+        """
     # The rebuild_ownership_overlay function is responsible for updating the ownership overlay based on the current state of the game. 
     # It checks each pixel in the territory mask and colors it according to the owner of the corresponding territory.
     def rebuild_ownership_overlay(self):
