@@ -77,6 +77,13 @@ python testing_files/test_dice.py
 python -m unittest testing_files/test_dice.py
 python -m testing_files.test_dice
 
+# Card Features
+# Runs 13 checks covering deck creation, set validation, trade values, trading and
+# territory bonuses, reward cards, phase restrictions, card transfers, and discard recycling.
+# Prints PASS for each check and stops at the first FAIL.
+python testing_files/test_card_features.py
+python -m testing_files.test_card_features
+
 # Instructions
 # Will open and allow interaction with help screen in a pygame window, shows all current rules and instructions.
 python testing_files/test_instructions.py
