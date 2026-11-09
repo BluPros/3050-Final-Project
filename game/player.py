@@ -79,8 +79,7 @@ class Player:
             f"Terr. Count: {len(self.territories)}"
         ]
 
-        # TODO: Fix magic number
-        y = self.y_center - constants.CARD_HEIGHT // 2 + 15
+        y = self.y_center - constants.CARD_HEIGHT // 2 + constants.CARD_TEXT_PADDING
         for line in lines:
             surf = font.render(line, True, constants.TEXT_COLOR)
             surface.blit(surf, surf.get_rect(center=(self.x_center, y)))
