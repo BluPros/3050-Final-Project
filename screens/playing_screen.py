@@ -5,6 +5,7 @@ import pygame
 import constants
 from screens.base_screen import Screen
 from game.game_state import Game
+from game.bot_ai import BotAI
 from ui.playing import PlayingOverlay
 from ui.map_screen import MapScreen
 
@@ -49,6 +50,11 @@ class PlayingScreen(Screen):
         # Record the time of the last bot action to add delay to the next bot action
         self.last_bot_action = pygame.time.get_ticks()
 
+        # Bot decision-making and turn limits
+        self.bot_ai = BotAI(difficulty="easy")
+        self.bot_attack_actions = 0
+        self.bot_max_attacks = 12
+
 
     def configure_game(self, player_settings):
         # Create a Game object for every new match
@@ -85,7 +91,9 @@ class PlayingScreen(Screen):
 
         self.last_bot_action = pygame.time.get_ticks()
         self.last_phase = self.game.phase
+        self.bot_attack_actions = 0
         self.playing_overlay.update_phase_widgets()
+
 
         print("Starting new game:")
         for player in self.game.players:
@@ -241,9 +249,7 @@ class PlayingScreen(Screen):
 
             self.manager.change_screen("game_over")
             return
-        # Bots act during both setup phases
-        if self.game.phase not in ("setup_claim", "setup_place"):
-            return
+
 
         player = self.game.current_player
 
@@ -305,9 +311,117 @@ class PlayingScreen(Screen):
                     f"Remaining armies: "
                     f"{self.game.setup_armies[player.player_id]}"
                 )
+        elif self.game.phase in ("deploy", "attack", "fortify"):
+            self.run_bot_turn()
 
         # Restart the timer after the bot action
         self.last_bot_action = current_time
+
+
+    def run_bot_turn(self):
+        """Performs one bot action during the game loop."""
+        game = self.game
+        player = game.current_player
+
+        if player is None or not player.is_bot:
+            return
+
+        if game.phase == "deploy":
+            # Card Trades
+            if game.must_redeem_cards():
+                card_ids = self.bot_ai.choose_card_trade(game)
+
+                if card_ids is None:
+                    print(f"{player.name} has no valid card trade.")
+                    return
+
+                result = game.redeem_card(card_ids)
+                print(
+                    f"{player.name} traded cards for "
+                    f"{result['reinforcements']} armies."
+                )
+                return
+
+            # Deployment
+            if player.reinforcements > 0:
+                action = self.bot_ai.choose_deployment(game)
+
+                if action is None:
+                    return
+
+                territory_name, count = action
+
+                if game.deploy(territory_name, count):
+                    print(
+                        f"{player.name} deployed {count} troops "
+                        f"to {territory_name}."
+                    )
+                return
+
+            # All reinforcements have been placed.
+            self.bot_attack_actions = 0
+            self.advance_phase()
+
+        elif game.phase == "attack":
+            # Conquest Movement
+            if game.pending_conquest is not None:
+                count = self.bot_ai.choose_move_in(game)
+
+                if count is None:
+                    print("Bot could not complete conquest movement.")
+                    return
+
+                if game.move_in(count):
+                    self.map_screen.rebuild_ownership_overlay()
+
+                    print(
+                        f"{player.name} moved {count} troops "
+                        "into the conquered territory."
+                    )
+                return
+
+            # Attack Phase Limit
+            if self.bot_attack_actions >= self.bot_max_attacks:
+                self.advance_phase()
+                return
+
+            action = self.bot_ai.choose_attack(game)
+
+            if action is None:
+                self.advance_phase()
+                return
+
+            source, destination, dice_count = action
+
+            result = game.attack(
+                source,
+                destination,
+                dice_count
+            )
+
+            if result is not None:
+                self.bot_attack_actions += 1
+
+                print(
+                    f"{player.name} attacked {destination} "
+                    f"from {source}."
+                )
+
+        # Fortification Phase
+        elif game.phase == "fortify":
+            action = self.bot_ai.choose_fortification(game)
+
+            if action is not None:
+                source, destination, count = action
+
+                if game.fortify(source, destination, count):
+                    print(
+                        f"{player.name} fortified {destination} "
+                        f"with {count} troops."
+                    )
+
+            # End of Fortification Phase
+            self.advance_phase()
 
     def on_enter(self):
         super().on_enter()
