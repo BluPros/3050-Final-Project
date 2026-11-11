@@ -51,7 +51,7 @@ class PlayingScreen(Screen):
         self.last_bot_action = pygame.time.get_ticks()
 
         # Bot decision-making and turn limits
-        self.bot_ai = BotAI(difficulty="easy")
+        self.bot_ai = BotAI(difficulty="medium")
         self.bot_attack_actions = 0
         self.bot_max_attacks = 12
 
