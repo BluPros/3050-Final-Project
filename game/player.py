@@ -20,6 +20,7 @@ class Player:
 
     is_bot: bool = False
     eliminated: bool = False
+    difficulty: str = "easy"
 
     # Details for drawing player information panels on the playing screen.
     x_center = 0

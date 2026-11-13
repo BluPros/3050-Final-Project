@@ -31,6 +31,9 @@ class NewGameScreen(Screen):
             icon.left_color_button.show()
             icon.right_color_button.show()
 
+        for bot in self.new_game_menu.bots:
+            bot.difficulty_button.show()
+
         for player in self.new_game_menu.players:
             player.name_input.show()
 

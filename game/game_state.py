@@ -77,7 +77,7 @@ class Game:
 
         return self.players[self.current_player_index]
 
-    def add_player(self, name, color, is_bot=False):
+    def add_player(self, name, color, is_bot=False, difficulty="easy"):
         """Create player object"""
         # Assign a unique player_id based on the current number of players
         player_id = len(self.players)
@@ -87,7 +87,8 @@ class Game:
             player_id=player_id,
             name=name,
             color=color,
-            is_bot=is_bot
+            is_bot=is_bot,
+            difficulty=difficulty
         )
 
         # Append the new player to the list of players in the game

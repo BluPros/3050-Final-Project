@@ -61,7 +61,7 @@ class BotAI:
     def owns_continent(self, game, continent_name):
         """Check if the current player owns all territories in the given continent."""
         player_id = game.current_player.player_id
-        continent = continents.get(continent_name)
+        continent = continents[continent_name]
 
         return all(
             game.territories[name].owner_id == player_id
@@ -71,7 +71,7 @@ class BotAI:
     def remaining_continent_enemy_territories(self, game, continent_name):
         """Get the enemy territories in the given continent that are not owned by the current player."""
         player_id = game.current_player.player_id
-        continent = continents.get(continent_name)
+        continent = continents[continent_name]
 
         return [
             game.territories[name]
@@ -99,12 +99,12 @@ class BotAI:
             score -= 8
 
         # +5 if this territory borders the last enemy in a continent
-        remaining = self.remaining_continent_enemy_territories(game, territory.continent_name)
+        remaining = self.remaining_continent_enemy_territories(game, territory.continent)
 
         if len(remaining) == 1:
             last_enemy = remaining[0]
 
-            if last_enemy.name == territory.neighbors:
+            if last_enemy.name in territory.neighbors:
                 score += 5
 
         # -3 if this territory is isolated from allies
@@ -113,10 +113,10 @@ class BotAI:
 
         return score
 
-    def fortify_source_score(self, game, territory, destination):
+    def fortify_source_score(self, game, territory):
         """Calculate a score for fortifying troops from the given source territory to the destination territory."""
         score = 0
-        allies = self.allied_neighbors(game, territory)
+
         enemies = self.enemy_neighbors(game, territory)
 
         # +8 for removing troops from an interior territory
@@ -124,23 +124,42 @@ class BotAI:
             score += 8
 
         # -8 for weakening a defended border of a held continen
-        if enemies and self.owned_continent(game, territory.continent):
+        if enemies and self.owns_continent(game, territory.continent):
             score -= 8
 
         return score
+
+    def count_player_territories(self, game, player_id):
+        """Count the number of territories owned by a specific player."""
+        count = 0
+        for territory in game.territories.values():
+            if territory.owner_id == player_id:
+                count += 1
+        return count
 
     def score_attack(self, game, source, target):
         """Calculate a score for attacking from the source territory to the target territory."""
         score = 0
         attacking_troops = source.troops - 1
         advantage = attacking_troops - target.troops
+        enemy_territory_count = self.count_player_territories(game, target.owner_id)
 
-        # +3 for each troop of advantage.
+        # +20 if the target player has only one territory, +8 if they have three or fewer territories
+        if enemy_territory_count == 1:
+            score += 20
+        elif enemy_territory_count <= 3:
+            score += 8
+
+        # +5 if the attacking troops are more than double the target's troops
+        if attacking_troops > target.troops * 2:
+            score += 5
+
+        # +3 for each troop of advantage up to a maximum of 15
         if advantage > 0:
-            score += advantage * 3
+            score += min(advantage, 5) * 3
 
         # +10 if the target territory is the last enemy in a continent
-        remaining = self.remaining_continent_enemy_territories(game, target.continent_name)
+        remaining = self.remaining_continent_enemy_territories(game, target.continent)
 
         if len(remaining) == 1:
             last_enemy = remaining[0]
@@ -166,19 +185,6 @@ class BotAI:
 
         return score
 
-    def border_score(self, game, territory):
-        """Calculate a score for the given territory based on its bordering enemy territories."""
-        enemy_neighbors = self.enemy_neighbors(game, territory)
-
-        if not enemy_neighbors:
-            return 0
-
-        strongest_enemy = max(enemy.troops for enemy in enemy_neighbors)
-
-        threat = max(0, strongest_enemy - territory.troops)
-
-        return (len(enemy_neighbors) * 3 + threat * 2 + 2)
-
     def choose_deployment(self, game):
         """Choose where to deploy reinforcements."""
         player = game.current_player
@@ -192,7 +198,7 @@ class BotAI:
 
         else:
             scores = [
-                (self.score_destination
+                (self.deploy_fortify_destination_score
                  (game, territory, player.reinforcements), territory)
                    for territory in owned]
 
@@ -208,7 +214,7 @@ class BotAI:
         player = game.current_player
 
         # Easy bots sometimes skip attacking.
-        if random.random() < 0.25:
+        if self.difficulty == "easy" and random.random() < 0.25:
             return None
 
         possible_attacks = []
@@ -263,8 +269,9 @@ class BotAI:
                 ]
                 _, source, target = random.choice(best_attacks)
 
-        dice_count = 1
-        return source, target, dice_count
+        dice_count = min(3, source.troops - 1)
+
+        return source.name, target.name, dice_count
 
     def choose_move_in(self, game):
         """Choose how many troops to move after a conquest."""
@@ -327,13 +334,14 @@ class BotAI:
                 return None
             source, destination = random.choice(possible_moves)
             count = random.randint(1, source.troops - 1)
-            return source, destination, count
+            return source.name, destination.name, count
 
         scored_moves = []
         for source, destination in possible_moves:
-            source_score = self.score_fortification(game, source, destination)
+            count = source.troops - 1
+            source_score = self.fortify_source_score(game, source)
 
-            destination_score = self.fortify_source_score(game, source, destination)
+            destination_score = self.deploy_fortify_destination_score(game, destination, count)
             score = source_score + destination_score
 
             if score > 0:
@@ -342,7 +350,7 @@ class BotAI:
         if not scored_moves:
             return None
 
-        if self.use_random_choice:
+        if self.use_random_choice():
             _, source, destination, count = random.choice(scored_moves)
 
         else:

@@ -29,8 +29,12 @@ class BotIcon:
         self.y_center = 400
         self.color_index = 0
         self.player_color = PLAYER_COLORS[self.color_index]
+        self.difficulties = ["easy", "medium", "hard"]
+        self.difficulty_index = 0
+        self.difficulty = self.difficulties[self.difficulty_index]
         self.left_color_button, self.right_color_button = self.create_color_buttons()
         self.name = self.generate_name(existing_names)
+        self.difficulty_button = self.create_difficulty_button()
         self.update_attributes()
 
     @staticmethod
@@ -52,6 +56,8 @@ class BotIcon:
         self.left_color_button.setY(self.y_center - 10)
         self.right_color_button.setX(self.x_center + 53)
         self.right_color_button.setY(self.y_center - 10)
+        self.difficulty_button.setX(self.x_center - 50)
+        self.difficulty_button.setY(self.y_center + 76)
 
     def create_color_buttons(self):
         left_button = Button(
@@ -87,6 +93,31 @@ class BotIcon:
         else:
             self.color_index += 1
         self.player_color = PLAYER_COLORS[self.color_index]
+
+    def create_difficulty_button(self):
+        """Create the button used to change bot difficulty."""
+        return Button(
+            self.surface,
+            0, 0, 100, 20,
+            text=self.difficulty.capitalize(),
+            fontSize=13,
+            inactiveColour=(139, 99, 62),
+            hoverColour=(169, 135, 91),
+            pressedColour=(73, 50, 31),
+            onClick=self.change_difficulty
+        )
+
+    def change_difficulty(self):
+        """Cycle between Easy, Medium, and Hard."""
+        self.difficulty_index = (
+            self.difficulty_index + 1
+        ) % len(self.difficulties)
+
+        self.difficulty = self.difficulties[self.difficulty_index]
+
+        self.difficulty_button.setText(
+            self.difficulty.capitalize()
+        )
 
     def draw(self, surface):
         # Background box

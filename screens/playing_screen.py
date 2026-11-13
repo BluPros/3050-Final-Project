@@ -49,11 +49,13 @@ class PlayingScreen(Screen):
 
         # Record the time of the last bot action to add delay to the next bot action
         self.last_bot_action = pygame.time.get_ticks()
+        self.simulation_paused = False
+        self.simulation_speed = 1
 
         # Bot decision-making and turn limits
-        self.bot_ai = BotAI(difficulty="medium")
+        self.bot_ais = {}
         self.bot_attack_actions = 0
-        self.bot_max_attacks = 12
+        self.bot_max_attacks = 30
 
 
     def configure_game(self, player_settings):
@@ -65,8 +67,13 @@ class PlayingScreen(Screen):
             self.game.add_player(
                 settings["name"],
                 settings["color"],
-                is_bot=settings["is_bot"]
+                is_bot=settings["is_bot"],
+                difficulty=settings.get("difficulty", "easy")
             )
+        self.bot_ais = {
+            player.player_id: BotAI(difficulty=player.difficulty)
+            for player in self.game.players if player.is_bot
+        }
 
         # Set up claiming and starting armies
         if not self.game.start_setup():
@@ -91,6 +98,8 @@ class PlayingScreen(Screen):
 
         self.last_bot_action = pygame.time.get_ticks()
         self.last_phase = self.game.phase
+        self.simulation_paused = False
+        self.simulation_speed = 1
         self.bot_attack_actions = 0
         self.playing_overlay.update_phase_widgets()
 
@@ -185,6 +194,20 @@ class PlayingScreen(Screen):
                     f"Phase: {self.game.phase}"
                 )
 
+        if event.type == pygame.KEYDOWN:
+            # Pause or resume the simulation
+            if event.key == pygame.K_p:
+                self.simulation_paused = not self.simulation_paused
+                self.last_bot_action = pygame.time.get_ticks()
+
+            # adjust the speeed of the simulation
+            elif event.key == pygame.K_1:
+                self.simulation_speed = 1
+            elif event.key == pygame.K_2:
+                self.simulation_speed = 5
+            elif event.key == pygame.K_3:
+                self.simulation_speed = 20
+
         # Handle the Escape key to return to the menu
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             self.manager.change_screen("menu")
@@ -257,11 +280,16 @@ class PlayingScreen(Screen):
         if player is None or not player.is_bot:
             return
 
+        if self.simulation_paused:
+            return
+
         current_time = pygame.time.get_ticks()
 
-        # Wait one second between bot actions
-        if current_time - self.last_bot_action < self.bot_delay:
+        effective_delay = max(1, self.bot_delay // self.simulation_speed)
+
+        if current_time - self.last_bot_action < effective_delay:
             return
+
 
         if self.game.phase == "setup_claim":
 
@@ -323,13 +351,16 @@ class PlayingScreen(Screen):
         game = self.game
         player = game.current_player
 
+
         if player is None or not player.is_bot:
             return
+
+        bot_ai = self.bot_ais[player.player_id]
 
         if game.phase == "deploy":
             # Card Trades
             if game.must_redeem_cards():
-                card_ids = self.bot_ai.choose_card_trade(game)
+                card_ids = bot_ai.choose_card_trade(game)
 
                 if card_ids is None:
                     print(f"{player.name} has no valid card trade.")
@@ -344,7 +375,7 @@ class PlayingScreen(Screen):
 
             # Deployment
             if player.reinforcements > 0:
-                action = self.bot_ai.choose_deployment(game)
+                action = bot_ai.choose_deployment(game)
 
                 if action is None:
                     return
@@ -365,7 +396,7 @@ class PlayingScreen(Screen):
         elif game.phase == "attack":
             # Conquest Movement
             if game.pending_conquest is not None:
-                count = self.bot_ai.choose_move_in(game)
+                count = bot_ai.choose_move_in(game)
 
                 if count is None:
                     print("Bot could not complete conquest movement.")
@@ -385,7 +416,7 @@ class PlayingScreen(Screen):
                 self.advance_phase()
                 return
 
-            action = self.bot_ai.choose_attack(game)
+            action = bot_ai.choose_attack(game)
 
             if action is None:
                 self.advance_phase()
@@ -409,7 +440,7 @@ class PlayingScreen(Screen):
 
         # Fortification Phase
         elif game.phase == "fortify":
-            action = self.bot_ai.choose_fortification(game)
+            action = bot_ai.choose_fortification(game)
 
             if action is not None:
                 source, destination, count = action

@@ -85,6 +85,9 @@ class NewGameMenu:
             icon.left_color_button.hide()
             icon.right_color_button.hide()
 
+        for bot in self.bots:
+            bot.difficulty_button.hide()
+
         for player in self.players:
             player.name_input.hide()
 
@@ -95,6 +98,9 @@ class NewGameMenu:
         for icon in self.players + self.bots:
             icon.left_color_button.show()
             icon.right_color_button.show()
+
+        for bot in self.bots:
+            bot.difficulty_button.show()
 
         for player in self.players:
             player.name_input.show()
@@ -150,6 +156,7 @@ class NewGameMenu:
             bot = BotIcon(surface, existing_names)
             self.choose_unused_color(bot)
             self.bots.append(bot)
+            bot.difficulty_button.show()
 
         self.reconfigure_players()
 
@@ -159,6 +166,7 @@ class NewGameMenu:
 
             deleted_bot.left_color_button.hide()
             deleted_bot.right_color_button.hide()
+            deleted_bot.difficulty_button.hide()
 
             self.reconfigure_players()
 
@@ -172,24 +180,28 @@ class NewGameMenu:
 
     def draw(self, surface):
         surface.fill(BACKGROUND_COLOR)
+
         # Title
         font = pygame.font.SysFont(constants.FONT_STYLE, 52)
         text_surface = font.render("Player Initiation", True, TEXT_COLOR)
         text_rect = text_surface.get_rect()
         text_rect.center = (640, 80)
         surface.blit(text_surface, text_rect)
+
         # Select # of Players
         font = pygame.font.SysFont(constants.FONT_STYLE, 24)
         text_surface = font.render("Select Number of Players", True, TEXT_COLOR)
         text_rect = text_surface.get_rect()
         text_rect.center = (320, 160)
         surface.blit(text_surface, text_rect)
+
         # Select # of Bots
         font = pygame.font.SysFont(constants.FONT_STYLE, 24)
         text_surface = font.render("Select Number of Bots", True, TEXT_COLOR)
         text_rect = text_surface.get_rect()
         text_rect.center = (960, 160)
         surface.blit(text_surface, text_rect)
+
         # Player count box and text
         player_box = pygame.Rect(290, 210, 60, 60)
         pygame.draw.rect(surface, PLAYER_ICON_COLOR, player_box)
@@ -198,6 +210,7 @@ class NewGameMenu:
         text_rect = text_surface.get_rect()
         text_rect.center = (320, 240)
         surface.blit(text_surface, text_rect)
+
         # Bot count box and text
         bot_box = pygame.Rect(930, 210, 60, 60)
         pygame.draw.rect(surface, BOT_ICON_COLOR, bot_box)
@@ -206,9 +219,11 @@ class NewGameMenu:
         text_rect = text_surface.get_rect()
         text_rect.center = (960, 240)
         surface.blit(text_surface, text_rect)
+
         #redraw all icons
         for icon in self.players + self.bots:
             icon.draw(surface)
+
         # draw popups if needed and hide widgets
         self.error_popup.draw()
         self.confirmation_popup.draw()
@@ -221,12 +236,9 @@ class NewGameMenu:
 
         if not (
             constants.MIN_PLAYERS <= total_players <= constants.MAX_PLAYERS
-            and len(self.players) >= 1
-            and len(self.bots) >= 1
         ):
             error_message += (
                 "Please select 3-6 total players.\n"
-                "You need at least one human and one bot.\n"
                 f"Currently: {len(self.players)} human(s), "
                 f"{len(self.bots)} bot(s).\n"
             )
@@ -273,6 +285,8 @@ class NewGameMenu:
             icon.left_color_button.show()
         for player in self.players:
             player.name_input.show()
+        for bot in self.bots:
+            bot.difficulty_button.show()
 
     def start_game(self):
         player_settings = []
@@ -289,7 +303,8 @@ class NewGameMenu:
             player_settings.append({
                 "name": bot.name,
                 "color": bot.player_color,
-                "is_bot": True
+                "is_bot": True,
+                "difficulty": bot.difficulty,
             })
 
         self.on_start(player_settings)
