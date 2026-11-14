@@ -4,6 +4,7 @@ from pygame_widgets.button import Button
 import constants
 from ui.popups.error_popup import ErrorPopUp
 from ui.popups.confirmation_popup import ConfirmationPopUp
+import random
 
 class PlayingOverlay:
     """Manages the playing screen, including widgets, popups, and game state tracking."""
@@ -28,6 +29,22 @@ class PlayingOverlay:
         self.attack_troop_counter = 0
         self.fortify_widgets = []
         self.fortify_troop_counter = 0
+
+        # Track dice popups
+        self.dice_popup = False
+        self.dice_rolling = False
+        self.dice_started = 0
+        self.dice_duration = 900
+        self.dice_last_frame = -1
+        self.dice_random = random.Random()
+
+        # Store the displayed rolls and actual result
+        self.attacker_faces = []
+        self.defender_faces = []
+        self.dice_result = None
+        self.dice_source = ""
+        self.dice_destination = ""
+        self.dice_message = ""
 
         # Track selected territories
         self.selected_src = None
@@ -263,8 +280,12 @@ class PlayingOverlay:
             self.attack_troop_counter += 1
 
     def initiate_attack(self):
-        if self.on_attack is not None:
-            self.on_attack()
+        if self.moving_in:
+            if self.on_attack is not None:
+                self.on_attack()
+            return
+
+        self.show_dice()
 
     def remove_fortify_troop(self):
         if self.fortify_troop_counter > 0:
@@ -863,3 +884,366 @@ class PlayingOverlay:
     def show_cards(self):
         if self.on_cards is not None:
             self.on_cards()
+
+    # Opens the dice popup for the selected attack
+    def show_dice(self):
+        if self.dice_popup or self.game.phase != "attack":
+            return
+
+        if self.selected_src is None or self.selected_dst is None:
+            return
+
+        if not self.game.verify_attack(
+            self.selected_src.name,
+            self.selected_dst.name,
+            self.attack_troop_counter
+        ):
+            return
+
+        self.dice_popup = True
+        self.dice_rolling = False
+        self.dice_result = None
+        self.attacker_faces = []
+        self.defender_faces = []
+        self.dice_source = self.selected_src.name
+        self.dice_destination = self.selected_dst.name
+        self.dice_message = "Click Roll to resolve this attack"
+        self.hide_widgets(
+            self.widgets + self.deploy_widgets
+            + self.attack_widgets + self.fortify_widgets
+        )
+
+
+    # Closes the dice popup and restores the controls
+    def close_dice(self):
+        if self.dice_rolling:
+            return
+
+        self.dice_popup = False
+        self.show_widgets(self.widgets)
+        self.update_phase_widgets()
+
+
+    # Resolves one attack using the existing callback
+    def roll_dice(self):
+        if not self.dice_popup or self.dice_rolling:
+            return
+
+        if self.dice_result is not None or self.on_attack is None:
+            return
+
+        # Clear old results before requesting a new attack
+        self.game.clear_last_attack()
+        self.on_attack()
+        result = self.game.get_last_attack()
+
+        if result is None:
+            self.dice_message = "Attack could not be completed"
+            return
+
+        self.dice_result = result
+        self.dice_started = pygame.time.get_ticks()
+        self.dice_last_frame = -1
+        self.dice_rolling = True
+        self.dice_message = "Rolling dice"
+
+        # Keep the movement counter valid after a conquest
+        if self.game.pending_conquest is not None:
+            self.attack_troop_counter = self.game.pending_conquest["min_move"]
+
+        self.update_dice()
+
+
+    # Updates the animation without making another attack
+    def update_dice(self):
+        if not self.dice_popup or not self.dice_rolling:
+            return
+
+        elapsed = pygame.time.get_ticks() - self.dice_started
+
+        if elapsed >= self.dice_duration:
+            self.attacker_faces = list(self.dice_result["attack_roll"])
+            self.defender_faces = list(self.dice_result["defence_roll"])
+            self.dice_rolling = False
+            self.dice_message = (
+                f"Attacker lost {self.dice_result['attacker_losses']} | "
+                f"Defender lost {self.dice_result['defender_losses']}"
+            )
+
+            if self.dice_result["conquered"]:
+                self.dice_message += " | Close to confirm troop movement"
+            return
+
+        frame = elapsed // 80
+        if frame != self.dice_last_frame:
+            self.dice_last_frame = frame
+
+            # Temporary faces do not change the real game rolls
+            self.attacker_faces = [
+                self.dice_random.randint(1, 6)
+                for _ in self.dice_result["attack_roll"]
+            ]
+            self.defender_faces = [
+                self.dice_random.randint(1, 6)
+                for _ in self.dice_result["defence_roll"]
+            ]
+
+    # Positions the dice controls inside the attack panel
+    def dice_layout(self):
+        self.dice_panel = pygame.Rect(
+            constants.PANEL_X_LEFT,
+            constants.PANEL_Y_TOP,
+            constants.PANEL_WIDTH,
+            constants.PANEL_HEIGHT
+        )
+
+        panel = self.dice_panel
+        button_width = (panel.width - 60) // 2
+
+        self.dice_roll_button = pygame.Rect(
+            panel.left + 20,
+            panel.bottom - 55,
+            button_width,
+            35
+        )
+
+        self.dice_close_button = pygame.Rect(
+            panel.centerx + 10,
+            panel.bottom - 55,
+            button_width,
+            35
+        )
+
+
+    # Handles popup input before the game controls
+    def handle_dice_event(self, event):
+
+        if not self.dice_popup:
+            return False
+
+        self.dice_layout()
+
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            self.close_dice()
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if self.dice_close_button.collidepoint(event.pos):
+                self.close_dice()
+            elif self.dice_roll_button.collidepoint(event.pos):
+                self.roll_dice()
+
+        return event.type in (
+            pygame.KEYDOWN, pygame.KEYUP, pygame.TEXTINPUT,
+            pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP,
+            pygame.MOUSEMOTION, pygame.MOUSEWHEEL
+        )
+
+
+    # Draws fitted text inside the dice popup
+    def dice_text(self, text, center, size=20, max_width=None):
+        font = pygame.font.SysFont(constants.FONT_STYLE, size)
+        image = font.render(text, True, constants.TEXT_COLOR)
+
+        if max_width and image.get_width() > max_width:
+            height = max(1, int(image.get_height() * max_width / image.get_width()))
+            image = pygame.transform.smoothscale(image, (max_width, height))
+
+        self.surface.blit(image, image.get_rect(center=center))
+
+
+    # Draws a die using dots
+    def draw_die(self, rect, value, color):
+        pygame.draw.rect(self.surface, color, rect, border_radius=8)
+        pygame.draw.rect(self.surface, constants.TEXT_COLOR, rect, 2, border_radius=8)
+        positions = {
+            1: [(1, 1)],
+            2: [(0, 0), (2, 2)],
+            3: [(0, 0), (1, 1), (2, 2)],
+            4: [(0, 0), (2, 0), (0, 2), (2, 2)],
+            5: [(0, 0), (2, 0), (1, 1), (0, 2), (2, 2)],
+            6: [(0, 0), (2, 0), (0, 1), (2, 1), (0, 2), (2, 2)]
+        }
+
+        for column, row in positions[value]:
+            center = (
+                rect.left + rect.width * (column + 1) // 4,
+                rect.top + rect.height * (row + 1) // 4
+            )
+            pygame.draw.circle(
+                self.surface, constants.TEXT_COLOR, center,
+                max(2, rect.width // 12)
+            )
+
+
+    # Draws the dice interface inside the attack panel
+    def draw_dice_popup(self, surface):
+        if not self.dice_popup:
+            return
+
+        self.surface = surface
+        self.dice_layout()
+        panel = self.dice_panel
+
+        # Cover the normal attack panel
+        pygame.draw.rect(
+            surface,
+            constants.ATTACK_COLOR,
+            panel,
+            border_radius=8
+        )
+
+        # Draw the panel title
+        self.dice_text(
+            "Attack Dice",
+            (panel.centerx, panel.top + 30),
+            28
+        )
+
+        # Draw the selected territories
+        self.dice_text(
+            "Attacking from",
+            (panel.centerx, panel.top + 65),
+            18
+        )
+        self.dice_text(
+            self.dice_source,
+            (panel.centerx, panel.top + 90),
+            22,
+            panel.width - 40
+        )
+
+        self.dice_text(
+            "Defending territory",
+            (panel.centerx, panel.top + 125),
+            18
+        )
+        self.dice_text(
+            self.dice_destination,
+            (panel.centerx, panel.top + 150),
+            22,
+            panel.width - 40
+        )
+
+        # Position the attacker and defender dice
+        centers = [
+            panel.left + panel.width // 4,
+            panel.left + panel.width * 3 // 4
+        ]
+
+        faces = [
+            self.attacker_faces,
+            self.defender_faces
+        ]
+
+        colors = [
+            (225, 130, 115),
+            (220, 230, 245)
+        ]
+
+        labels = [
+            "Attacker",
+            "Defender"
+        ]
+
+        # Fit three dice inside either half of the panel
+        die_size = max(
+            12,
+            min(40, (panel.width // 2 - 40) // 3)
+        )
+        gap = 6
+
+        for index, center_x in enumerate(centers):
+            self.dice_text(
+                labels[index],
+                (center_x, panel.top + 195),
+                18
+            )
+
+            count = len(faces[index])
+            total_width = (
+                count * die_size
+                + max(0, count - 1) * gap
+            )
+
+            if count == 0:
+                self.dice_text(
+                    "Ready",
+                    (center_x, panel.top + 235),
+                    18
+                )
+
+            for die_index, value in enumerate(faces[index]):
+                rect = pygame.Rect(
+                    center_x - total_width // 2
+                    + die_index * (die_size + gap),
+                    panel.top + 215,
+                    die_size,
+                    die_size
+                )
+
+                self.draw_die(
+                    rect,
+                    value,
+                    colors[index]
+                )
+
+        # Show a short result on separate lines
+        if self.dice_rolling:
+            lines = ["Rolling dice"]
+        elif self.dice_result is not None:
+            lines = [
+                f"Attacker lost {self.dice_result['attacker_losses']}",
+                f"Defender lost {self.dice_result['defender_losses']}"
+            ]
+
+            if self.dice_result["conquered"]:
+                lines.append("Close to confirm troop movement")
+        else:
+            lines = [self.dice_message]
+
+        for index, line in enumerate(lines):
+            self.dice_text(
+                line,
+                (panel.centerx, panel.top + 285 + index * 23),
+                18,
+                panel.width - 30
+            )
+
+        # Draw the dice controls
+        roll_enabled = (
+            not self.dice_rolling
+            and self.dice_result is None
+        )
+        close_enabled = not self.dice_rolling
+
+        buttons = [
+            (
+                self.dice_roll_button,
+                "Roll",
+                roll_enabled
+            ),
+            (
+                self.dice_close_button,
+                "Close" if self.dice_result else "Cancel",
+                close_enabled
+            )
+        ]
+
+        for rect, label, enabled in buttons:
+            color = (
+                constants.BUTTON_COLOR
+                if enabled
+                else (145, 145, 145)
+            )
+
+            pygame.draw.rect(
+                surface,
+                color,
+                rect,
+                border_radius=5
+            )
+
+            self.dice_text(
+                label,
+                rect.center,
+                20
+            )

@@ -77,6 +77,12 @@ class PlayingScreen(Screen):
 
         # Update the existing overlay to use the new game
         self.playing_overlay.game = self.game
+
+        # Reset dice popup for new match
+        self.playing_overlay.dice_popup = False
+        self.playing_overlay.dice_rolling = False
+        self.playing_overlay.dice_result = None
+
         self.cards_popup.game = self.game
         self.cards_popup.hide()
         self.playing_overlay.clear_selection()
@@ -130,7 +136,11 @@ class PlayingScreen(Screen):
             print("Cannot advance phase yet.")
 
     def handle_event(self, event):
-        # Handle card pop up input before the map
+        # Handle dice input before the map
+        if self.playing_overlay.handle_dice_event(event):
+            return
+
+        # Handle card popup input before the map
         if self.cards_popup.visible:
             handled = self.cards_popup.handle_event(event)
 
@@ -248,11 +258,21 @@ class PlayingScreen(Screen):
         self.cards_popup.surface = surface
         self.cards_popup.draw()
 
+        # Draw popup above the game
+        self.playing_overlay.draw_dice_popup(surface)
+
     def update(self):
+        # Update the dice animation while gameplay is paused
+        if self.playing_overlay.dice_popup:
+            self.playing_overlay.update_dice()
+            self.last_bot_action = pygame.time.get_ticks()
+            return
+
+        # Pause gameplay while viewing cards
         if self.cards_popup.visible:
             self.last_bot_action = pygame.time.get_ticks()
             return
-        
+
         self.map_screen.update()
 
         if self.game.phase != self.last_phase:
@@ -349,8 +369,12 @@ class PlayingScreen(Screen):
     def on_exit(self):
         super().on_exit()
 
-        # Close popup when leaving screen
+        # Close the cards popup when leaving the screen
         self.cards_popup.hide()
+
+        # Reset the dice popup when leaving the screen
+        self.playing_overlay.dice_popup = False
+        self.playing_overlay.dice_rolling = False
 
         self.playing_overlay.hide_widgets(
             self.playing_overlay.widgets
