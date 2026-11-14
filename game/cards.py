@@ -1,33 +1,78 @@
-# Defines Risk cards and helper functions for deck creation and card trades.
-# Territory symbols are assigned using the order of territories in the map data.
+# Defines Risk cards and helpers for decks, hands, and trades
+# Territory symbols match the symbols on the card images
 
 from dataclasses import dataclass, asdict
-from itertools import product
+from itertools import combinations, product
+import random
 
 
 SYMBOLS = ("infantry", "cavalry", "artillery")
 
+TERRITORY_SYMBOLS = {
+    "Afghanistan": "infantry",
+    "Alaska": "infantry",
+    "Alberta": "infantry",
+    "Argentina": "infantry",
+    "Brazil": "infantry",
+    "Central America": "cavalry",
+    "China": "artillery",
+    "Congo": "artillery",
+    "East Africa": "infantry",
+    "Eastern Australia": "cavalry",
+    "Eastern United States": "cavalry",
+    "Egypt": "cavalry",
+    "Great Britain": "infantry",
+    "Greenland": "artillery",
+    "Iceland": "cavalry",
+    "India": "cavalry",
+    "Indonesia": "infantry",
+    "Irkutsk": "artillery",
+    "Japan": "cavalry",
+    "Kamchatka": "artillery",
+    "Madagascar": "cavalry",
+    "Middle East": "artillery",
+    "Mongolia": "cavalry",
+    "New Guinea": "cavalry",
+    "North Africa": "cavalry",
+    "Northern Europe": "cavalry",
+    "Northwest Territory": "infantry",
+    "Ontario": "cavalry",
+    "Peru": "cavalry",
+    "Quebec": "artillery",
+    "Scandinavia": "infantry",
+    "Siam": "cavalry",
+    "Siberia": "infantry",
+    "South Africa": "artillery",
+    "Southern Europe": "infantry",
+    "Ukraine": "infantry",
+    "Ural": "infantry",
+    "Venezuela": "cavalry",
+    "Western Australia": "artillery",
+    "Western Europe": "infantry",
+    "Western United States": "cavalry",
+    "Yakutsk": "artillery",
+}
 
-# Stores the ID, territory, and symbol of a single card.
+# Stores the ID, territory, and symbol of a card
 @dataclass(frozen=True)
 class Card:
-    """Represents a single Risk card with an ID, territory, and symbol."""
+    """Represents a single Risk card"""
     card_id: str
     territory: str | None
     symbol: str
 
-    # Returns the card information as a dictionary.
+    # Returns the card as a dictionary
     def to_dict(self):
         return asdict(self)
 
 
-# Creates one card per territory and adds two wild cards.
+# Creates one card per territory and two wild cards
 def make_deck(territories):
     cards = []
 
-    # Alternate between the three symbols in territory insertion order.
-    for index, territory_name in enumerate(territories):
-        symbol = SYMBOLS[index % len(SYMBOLS)]
+    # Use the symbol shown on each card image
+    for territory_name in territories:
+        symbol = TERRITORY_SYMBOLS[territory_name]
 
         card = Card(
             card_id=territory_name,
@@ -55,10 +100,30 @@ def make_deck(territories):
 
     return cards
 
+# Shuffles the deck in place
+def shuffle_deck(deck, rng=None):
+    if rng is None:
+        rng = random
 
-# Checks whether three different cards form a valid trade set.
+    rng.shuffle(deck)
+    return deck
+
+
+# Draws the last card and refills from discards if needed
+def draw_card(deck, discard_pile=None, rng=None):
+    if not deck and discard_pile:
+        deck.extend(discard_pile)
+        discard_pile.clear()
+        shuffle_deck(deck, rng)
+
+    if not deck:
+        return None
+
+    return deck.pop()
+
+
+# Checks whether three different cards form a valid set
 def valid_set(cards):
-    # A trade must contain exactly three cards.
     if len(cards) != 3:
         return False
 
@@ -67,7 +132,7 @@ def valid_set(cards):
         for card in cards
     }
 
-    # The same card cannot appear more than once in a trade.
+    # Reject repeated cards
     if len(card_ids) != 3:
         return False
 
@@ -76,7 +141,7 @@ def valid_set(cards):
     if any(card.symbol not in allowed_symbols for card in cards):
         return False
 
-    # Wild cards can represent any of the three regular symbols.
+    # Wild cards can use any regular symbol
     options = []
 
     for card in cards:
@@ -85,7 +150,7 @@ def valid_set(cards):
         else:
             options.append((card.symbol,))
 
-    # A valid set has either three matching symbols or three different
+    # Accept matching symbols or three different symbols
     for values in product(*options):
         symbol_count = len(set(values))
 
@@ -94,7 +159,25 @@ def valid_set(cards):
 
     return False
 
-# Calculates the reward based on the number of sets already traded by all players.
+
+# Finds every valid three-card set in a hand
+def find_valid_sets(hand):
+    return [
+        list(cards)
+        for cards in combinations(hand, 3)
+        if valid_set(cards)
+    ]
+
+
+# Checks whether a hand has a valid set
+def has_valid_set(hand):
+    return any(
+        valid_set(cards)
+        for cards in combinations(hand, 3)
+    )
+
+
+# Calculates the reward using the global trade count
 def trade_value(previous_trades):
     if (
         not isinstance(previous_trades, int)
@@ -108,5 +191,32 @@ def trade_value(previous_trades):
     if previous_trades < len(starting_values):
         return starting_values[previous_trades]
 
-    # After the sixth trade, each reward increases by five armies.
+    # Increase rewards by five after the sixth trade
     return 15 + 5 * (previous_trades - 5)
+
+
+# Removes a valid set from the hand and returns its reward
+def redeem_cards(hand, selected_cards, previous_trades, discard_pile):
+    selected_cards = list(selected_cards)
+
+    # Reject invalid trades before changing any lists
+    if not valid_set(selected_cards):
+        raise ValueError("Select three cards that form a valid set.")
+
+    if hand is discard_pile:
+        raise ValueError("The hand and discard pile must be different lists.")
+
+    remaining_cards = list(hand)
+
+    for card in selected_cards:
+        if card not in remaining_cards:
+            raise ValueError("Every selected card must belong to the player.")
+
+        remaining_cards.remove(card)
+
+    reward = trade_value(previous_trades)
+
+    hand[:] = remaining_cards
+    discard_pile.extend(selected_cards)
+
+    return reward

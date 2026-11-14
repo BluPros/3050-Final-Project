@@ -32,6 +32,9 @@ class Game:
         self.card_discard = []
         self.card_trades = 0
 
+        # Stores the latest attack for the dice display
+        self.last_attack = None
+
         # bool phase and card states
         self.captured_this_turn = False
         self.card_drawn_this_turn = False
@@ -292,6 +295,9 @@ class Game:
 
         self.pending_conquest = None
 
+        # Clear dice from the previous turn
+        self.last_attack = None
+
         player = self.current_player
         player.add_reinforcements(self.allocate_troops(player.player_id))
 
@@ -485,6 +491,9 @@ class Game:
     def attack(self, attacking_territory, defending_territory, num_attacking):
         """Single call of attack, implements attack logic, returns true if territory
         is conquered"""
+        # Clear the previous dice result
+        self.last_attack = None
+
         if not self.verify_attack(attacking_territory, defending_territory, num_attacking):
             return None
 
@@ -504,6 +513,17 @@ class Game:
         defender.remove_troops(dead_defence)
 
         conquered = defender.troops == 0
+
+        # Store the actual rolls and losses for the UI
+        self.last_attack = {
+            "source": attacking_territory,
+            "destination": defending_territory,
+            "attack_roll": list(attack_roll),
+            "defence_roll": list(defence_roll),
+            "attacker_losses": dead_attack,
+            "defender_losses": dead_defence,
+            "conquered": conquered
+        }
 
         if conquered:
             self.pending_conquest = {
@@ -809,3 +829,73 @@ class Game:
             "territories": territories,
             "cards": cards
         }
+
+    # Checks whether the current player can draw an earned card
+    def can_draw_card(self):
+        player = self.current_player
+
+        if player is None or player.eliminated:
+            return False
+
+        if not self.game_started or self.phase != "fortify":
+            return False
+
+        if self.pending_conquest is not None:
+            return False
+
+        if not self.captured_this_turn or self.card_drawn_this_turn:
+            return False
+
+        return bool(self.card_deck or self.card_discard)
+
+
+    # Draws a card from the popup when drawing is allowed
+    def draw_card_from_popup(self):
+        if not self.can_draw_card():
+            return None
+
+        return self.draw_card()
+
+
+    # Returns valid card ID selections for the current player
+    def available_card_sets(self):
+        from itertools import combinations
+
+        player = self.current_player
+
+        if player is None:
+            return []
+
+        return [
+            [card.card_id for card in cards]
+            for cards in combinations(player.cards, 3)
+            if valid_set(cards)
+        ]
+
+
+    # Checks whether the current player can trade cards
+    def can_redeem_cards(self):
+        player = self.current_player
+
+        if player is None or player.eliminated:
+            return False
+
+        if not self.game_started or self.phase != "deploy":
+            return False
+
+        return bool(self.available_card_sets())
+
+
+    # Returns the reward for the next card trade
+    def next_trade_value(self):
+        return trade_value(self.card_trades)
+
+
+    # Returns a copy of the latest attack for the UI
+    def get_last_attack(self):
+        return deepcopy(self.last_attack)
+
+
+    # Clears the displayed attack result
+    def clear_last_attack(self):
+        self.last_attack = None

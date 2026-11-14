@@ -7,6 +7,7 @@ from screens.base_screen import Screen
 from game.game_state import Game
 from ui.playing import PlayingOverlay
 from ui.map_screen import MapScreen
+from ui.popups.cards_popup import CardsPopup
 
 # Playing Screen
 
@@ -29,7 +30,9 @@ class PlayingScreen(Screen):
             on_help=lambda: manager.change_screen("instructions"),
             on_deploy=self.deploy_troops,
             on_fortify=self.fortify_troops,
-            on_attack=self.initiate_attack)
+            on_attack=self.initiate_attack,
+            on_cards=self.show_cards)
+        
 
         self.widgets = self.playing_overlay.widgets
         self.deploy_widgets = self.playing_overlay.deploy_widgets
@@ -41,6 +44,12 @@ class PlayingScreen(Screen):
             constants.VISIBLE_MAP,
             constants.MASK_MAP,
             self.game
+        )
+
+        # Create the cards popup
+        self.cards_popup = CardsPopup(
+            manager.screen,
+            self.game,
         )
 
         # Delay between bot actions in milliseconds
@@ -68,6 +77,8 @@ class PlayingScreen(Screen):
 
         # Update the existing overlay to use the new game
         self.playing_overlay.game = self.game
+        self.cards_popup.game = self.game
+        self.cards_popup.hide()
         self.playing_overlay.clear_selection()
         self.playing_overlay.map_limbo = False
 
@@ -119,6 +130,15 @@ class PlayingScreen(Screen):
             print("Cannot advance phase yet.")
 
     def handle_event(self, event):
+        # Handle card pop up input before the map
+        if self.cards_popup.visible:
+            handled = self.cards_popup.handle_event(event)
+
+            if not self.cards_popup.visible:
+                self.restore_card_controls()
+
+            if handled:
+                return
 
         # Test for end screen: Force Player 1 to win
         if event.type == pygame.KEYDOWN and event.key == pygame.K_F9:
@@ -224,7 +244,15 @@ class PlayingScreen(Screen):
                     self.playing_overlay.selected_dst
                 )
 
+        # Draw popup after the game
+        self.cards_popup.surface = surface
+        self.cards_popup.draw()
+
     def update(self):
+        if self.cards_popup.visible:
+            self.last_bot_action = pygame.time.get_ticks()
+            return
+        
         self.map_screen.update()
 
         if self.game.phase != self.last_phase:
@@ -320,6 +348,10 @@ class PlayingScreen(Screen):
 
     def on_exit(self):
         super().on_exit()
+
+        # Close popup when leaving screen
+        self.cards_popup.hide()
+
         self.playing_overlay.hide_widgets(
             self.playing_overlay.widgets
             + self.playing_overlay.deploy_widgets
@@ -392,3 +424,27 @@ class PlayingScreen(Screen):
 
         if successful_fortify:
             self.playing_overlay.clear_selection()
+
+    # Opens the current player's cards
+    def show_cards(self):
+        player = self.game.current_player
+
+        if player is None or player.is_bot:
+            return
+
+        # Hide the controls behind the popup
+        self.playing_overlay.hide_widgets(
+            self.widgets
+            + self.deploy_widgets
+            + self.attack_widgets
+            + self.fortify_widgets
+        )
+
+        self.cards_popup.show()
+
+    # Restores the controls after closing the popup
+    def restore_card_controls(self):
+        self.map_screen.rebuild_ownership_overlay()
+        self.playing_overlay.show_widgets(self.widgets)
+        self.playing_overlay.update_phase_widgets()
+        self.last_bot_action = pygame.time.get_ticks()

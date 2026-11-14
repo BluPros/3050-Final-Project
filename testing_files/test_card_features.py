@@ -1,7 +1,3 @@
-SYSTEM_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(SYSTEM_ROOT))
-
-
 import json
 
 from game.game_state import Game

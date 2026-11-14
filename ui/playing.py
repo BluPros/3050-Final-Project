@@ -10,7 +10,7 @@ class PlayingOverlay:
     def __init__(
             self, screen, on_exit, game, on_end_phase=None,
             on_help=None, on_deploy=None, on_fortify=None,
-            on_attack=None):
+            on_attack=None, on_cards=None):
         self.surface = screen
         self.on_exit = on_exit
         self.game = game
@@ -19,6 +19,7 @@ class PlayingOverlay:
         self.on_deploy = on_deploy
         self.on_fortify = on_fortify
         self.on_attack = on_attack
+        self.on_cards = on_cards
         self.players = []
         self.widgets = []
         self.deploy_widgets = []
@@ -90,7 +91,7 @@ class PlayingOverlay:
             Button(
                     self.surface, 810, 510, 180, 147,
                     text="Cards",
-                    onClick=lambda: print("Cards button not implemented"),
+                    onClick=self.show_cards,
                     inactiveColour=constants.BUTTON_COLOR,
                     pressedColour=constants.WHITE,
                     hoverColour=constants.BUTTON_HOVER_COLOR
@@ -858,3 +859,7 @@ class PlayingOverlay:
     def show_help(self):
         if self.on_help is not None:
             self.on_help()
+
+    def show_cards(self):
+        if self.on_cards is not None:
+            self.on_cards()
