@@ -1,7 +1,20 @@
+# Python virtual environments
 .venv/
+.venv-*/
 venv/
-__pycache__/
-*.pyc
-.vscode/
-.idea/
 
+# Python generated files
+__pycache__/
+*.py[cod]
+
+# Ignore temporary training checkpoints
+training/checkpoints/*
+
+# Keep the trained model available in Git
+!training/checkpoints/neural.weights.h5
+
+training/training_results.csv
+training/shaped_rewards*.csv
+
+# Simulation outputs
+neural_test*.csv

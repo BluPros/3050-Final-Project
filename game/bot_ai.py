@@ -85,6 +85,20 @@ class BotAI:
         allies= self.allied_neighbors(game, territory)
         enemies = self.enemy_neighbors(game, territory)
 
+        # Reward positions that after deploying you can launch a favorable attack.
+        if enemies:
+            weakest_enemy = min(enemy.troops for enemy in enemies)
+
+            available_attackers = (
+                territory.troops + incoming_troops - 1
+            )
+
+            advantage = available_attackers - weakest_enemy
+
+            if advantage >= 2:
+                score += 6
+                score += min(advantage, 5) * 2
+
         # +4 to heuristic score if incoming troops could save a threatened territory
         if enemies:
             strongest_enemy = max(enemy.troops for enemy in enemies)

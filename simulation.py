@@ -7,18 +7,27 @@ from io import StringIO
 import constants
 from game.bot_ai import BotAI
 from game.game_state import Game
+from training.neural_bot import NeuralBot
 
 
 DIFFICULTIES = ("easy", "medium", "hard")
 MAX_ACTIONS = 50000
 MAX_ATTACKS_PER_TURN = 30
+MAX_TURNS = 500
 
 
-def create_game():
+def create_game(include_neural=False, neural_policy=None):
     """Create and initialize a three-bot Risk match."""
     game = Game()
 
-    for index, difficulty in enumerate(DIFFICULTIES):
+    # Add neural
+
+    if include_neural:
+        difficulties = ("easy", "hard", "neural")
+    else:
+        difficulties = DIFFICULTIES
+
+    for index, difficulty in enumerate(difficulties):
         game.add_player(
             name=f"{difficulty.capitalize()} Bot",
             color=constants.PLAYER_COLORS[index],
@@ -29,10 +38,15 @@ def create_game():
     if not game.start_setup():
         raise RuntimeError("Could not initialize the game.")
 
-    bots = {
-        player.player_id: BotAI(player.difficulty)
-        for player in game.players
-    }
+    bots = {}
+
+    for player in game.players:
+        if player.difficulty == "neural":
+            from training.neural_bot import NeuralBot
+            bots[player.player_id] = NeuralBot(policy=neural_policy)
+            print(f"Created Neural bot: {player.name}")
+        else:
+            bots[player.player_id] = BotAI(difficulty=player.difficulty)
 
     return game, bots
 
@@ -128,14 +142,18 @@ def perform_action(game, bots, attack_count):
     return attack_count
 
 
-def simulate(game_number):
+def simulate(game_number, include_neural=False, neural_policy=None):
     """Run a single game until victory or the action limit."""
-    game, bots = create_game()
+    game, bots = create_game(include_neural, neural_policy)
     attack_count = 0
     actions = 0
     turns = 0
 
-    while game.phase != "game_over" and actions < MAX_ACTIONS:
+    while (
+        game.phase != "game_over"
+        and turns < MAX_TURNS
+        and actions < MAX_ACTIONS
+    ):
         previous_phase = game.phase
 
         attack_count = perform_action(
@@ -152,13 +170,27 @@ def simulate(game_number):
     if game.winner_id is not None:
         winner = game.get_player(game.winner_id)
 
+    if winner is not None:
+        stop_reason = "victory"
+    elif turns >= MAX_TURNS:
+        stop_reason = "turn_limit"
+    else:
+        stop_reason = "action_limit"
+
+    neural_decisions = sum(
+        bot.attack_decisions
+        for bot in bots.values()
+        if hasattr(bot, "attack_decisions")
+    )
     return {
         "game": game_number,
         "winner": winner.name if winner else "No winner",
         "difficulty": winner.difficulty if winner else "",
         "turns": turns,
         "actions": actions,
-        "completed": winner is not None
+        "completed": winner is not None,
+        "stop_reason": stop_reason,
+        "neural_decisions": neural_decisions
     }
 
 # Main function to run multiple games and save their results this is useful for generating heuristic data for developing the
@@ -172,6 +204,10 @@ def main():
     parser.add_argument(
         "--output", default="simulation_results.csv"
     )
+    parser.add_argument(
+        "--include_neural", action="store_true",
+        help="Include a neural network bot in the games."
+    )
     args = parser.parse_args()
 
     if args.games < 1:
@@ -182,7 +218,7 @@ def main():
     for game_number in range(1, args.games + 1):
         # Suppress normal game-engine debug output.
         with redirect_stdout(StringIO()):
-            result = simulate(game_number)
+            result = simulate(game_number, include_neural=args.include_neural)
 
         results.append(result)
 
@@ -191,6 +227,7 @@ def main():
             f"{result['winner']} | "
             f"{result['turns']} turns | "
             f"{result['actions']} actions"
+            f" | Neural decisions: {result['neural_decisions']}"
         )
 
     with open(
@@ -200,7 +237,7 @@ def main():
             file,
             fieldnames=[
                 "game", "winner", "difficulty",
-                "turns", "actions", "completed"
+                "turns", "actions", "completed", "stop_reason", "neural_decisions"
             ]
         )
 
